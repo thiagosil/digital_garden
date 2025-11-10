@@ -18,14 +18,16 @@ interface MediaGridProps {
 export function MediaGrid({ items }: MediaGridProps) {
   if (items.length === 0) {
     return (
-      <div className="text-center py-12">
-        <p className="text-muted-foreground">No items found. Start by adding some media to your garden!</p>
+      <div className="text-center py-20">
+        <p className="text-muted-foreground text-lg font-light">
+          No items found. Start by adding some media to your library!
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-8 sm:gap-10 lg:gap-12">
       {items.map((item) => (
         <MediaCard
           key={item.id}

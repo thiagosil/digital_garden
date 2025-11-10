@@ -1,12 +1,19 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { Suspense } from "react";
 import "./globals.css";
+import { ClientLayout } from "@/components/client-layout";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
+  variable: "--font-inter"
+});
 
 export const metadata: Metadata = {
-  title: "Media Garden",
-  description: "A personal digital garden for tracking books, movies, TV shows, and video games",
+  title: "Echo",
+  description: "Reflections on books, movies, shows, and games",
 };
 
 export default function RootLayout({
@@ -15,8 +22,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={inter.className}>{children}</body>
+    <html lang="en" className="light">
+      <body className={inter.className}>
+        <Suspense fallback={<div className="min-h-screen bg-background" />}>
+          <ClientLayout>
+            {children}
+          </ClientLayout>
+        </Suspense>
+      </body>
     </html>
   );
 }

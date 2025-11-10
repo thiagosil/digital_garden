@@ -31,17 +31,20 @@ export function FilterBar({
   ];
 
   return (
-    <div className="mb-8 space-y-4">
+    <div className="mb-12 sm:mb-16 space-y-8">
       {/* Status Filters */}
       <div>
-        <h3 className="text-sm font-medium mb-3 text-muted-foreground">STATUS</h3>
-        <div className="flex flex-wrap gap-2">
+        <h3 className="text-xs font-semibold mb-4 text-muted-foreground uppercase tracking-wider">
+          Status
+        </h3>
+        <div className="flex flex-wrap gap-2.5">
           {statusOptions.map((option) => (
             <Button
               key={option.value || 'all'}
               variant={statusFilter === option.value ? 'default' : 'outline'}
               size="sm"
               onClick={() => onStatusFilterChange(option.value)}
+              className="font-medium"
             >
               {option.label}
             </Button>
@@ -51,14 +54,17 @@ export function FilterBar({
 
       {/* Type Filters */}
       <div>
-        <h3 className="text-sm font-medium mb-3 text-muted-foreground">MEDIA TYPE</h3>
-        <div className="flex flex-wrap gap-2">
+        <h3 className="text-xs font-semibold mb-4 text-muted-foreground uppercase tracking-wider">
+          Media Type
+        </h3>
+        <div className="flex flex-wrap gap-2.5">
           {typeOptions.map((option) => (
             <Button
               key={option.value || 'all'}
               variant={typeFilter === option.value ? 'default' : 'outline'}
               size="sm"
               onClick={() => onTypeFilterChange(option.value)}
+              className="font-medium"
             >
               {option.label}
             </Button>

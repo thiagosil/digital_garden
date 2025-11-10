@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { mediaQueries } from '@/lib/db';
+import { mediaQueries, initializeDb } from '@/lib/db';
 
 // GET single media item
 export async function GET(
@@ -7,6 +7,9 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Ensure database is initialized
+    await initializeDb();
+
     const { id } = await params;
     const item = await mediaQueries.findUnique(id);
 
@@ -33,6 +36,9 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Ensure database is initialized
+    await initializeDb();
+
     const { id } = await params;
     const body = await request.json();
     const { status, notes, completedAt } = body;
@@ -41,6 +47,20 @@ export async function PATCH(
 
     if (status !== undefined) {
       updateData.status = status;
+
+      // Auto-set completedAt when status changes to COMPLETED
+      if (status === 'COMPLETED' && completedAt === undefined) {
+        // Get current item to check if completedAt is already set
+        const currentItem = await mediaQueries.findUnique(id);
+        if (!currentItem?.completedAt) {
+          updateData.completedAt = new Date().toISOString();
+        }
+      }
+
+      // Clear completedAt when status changes away from COMPLETED
+      if (status !== 'COMPLETED' && completedAt === undefined) {
+        updateData.completedAt = null;
+      }
     }
 
     if (notes !== undefined) {
@@ -69,6 +89,9 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Ensure database is initialized
+    await initializeDb();
+
     const { id } = await params;
     await mediaQueries.delete(id);
 
