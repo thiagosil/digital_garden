@@ -1,0 +1,150 @@
+# Media Garden
+
+A personal digital garden for tracking books, movies, TV shows, and video games. Built with Next.js, TypeScript, Tailwind CSS, and shadcn/ui.
+
+## Features
+
+- **Add Media**: Search and add books, movies, TV shows, and video games to your collection
+- **Automatic Metadata**: Fetches cover art, synopsis, and creator info from public APIs
+- **Status Tracking**: Organize media by Backlog, In Progress, or Completed
+- **Personal Notes**: Write reviews and notes for each item
+- **Filtering**: Filter your collection by status and media type
+- **Clean Design**: Minimalist bookshelf-inspired layout
+
+## Tech Stack
+
+- **Framework**: Next.js 16 with App Router
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **Components**: shadcn/ui
+- **Database**: Prisma + SQLite
+- **APIs**:
+  - Google Books API (Books)
+  - TMDB API (Movies & TV Shows)
+  - RAWG API (Video Games)
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18+
+- npm or yarn
+
+### Installation
+
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd digital_garden
+```
+
+2. Install dependencies:
+```bash
+npm install
+```
+
+3. Set up environment variables:
+Create a `.env` file in the root directory:
+```env
+DATABASE_URL="file:./dev.db"
+
+# API Keys (optional but recommended)
+TMDB_API_KEY="your_tmdb_api_key"
+RAWG_API_KEY="your_rawg_api_key"
+# Google Books API doesn't require a key for basic usage
+```
+
+To get API keys:
+- TMDB: https://www.themoviedb.org/settings/api
+- RAWG: https://rawg.io/apidocs
+
+4. Generate Prisma Client and create the database:
+```bash
+npx prisma generate
+npx prisma db push
+```
+
+5. Run the development server:
+```bash
+npm run dev
+```
+
+6. Open [http://localhost:3000](http://localhost:3000) in your browser
+
+## Usage
+
+### Adding Media
+
+1. Click the "Add Media" button
+2. Select the media type (Book, Movie, TV Show, or Video Game)
+3. Search for the title
+4. Click "Add" on the item you want to add to your collection
+
+### Managing Items
+
+1. Click on any media card to view details
+2. Update the status (Backlog, In Progress, Completed)
+3. Write personal notes and reviews
+4. Save your changes
+
+### Filtering
+
+Use the filter buttons at the top of the page to:
+- Filter by status (Backlog, In Progress, Completed)
+- Filter by media type (Books, Movies, TV Shows, Video Games)
+- Combine filters to narrow down your collection
+
+## Database Schema
+
+The app uses a simple database schema with a single `MediaItem` model:
+
+- `id`: Unique identifier
+- `title`: Title of the media
+- `mediaType`: BOOK, MOVIE, TV_SHOW, or VIDEO_GAME
+- `status`: BACKLOG, IN_PROGRESS, or COMPLETED
+- `coverImage`: URL to cover art
+- `creator`: Author, director, or developer
+- `synopsis`: Description from the API
+- `notes`: User's personal notes
+- `completedAt`: Date when marked as completed
+- `apiId`: Original ID from the external API
+
+## Project Structure
+
+```
+digital_garden/
+├── app/
+│   ├── api/
+│   │   ├── media/          # CRUD operations for media items
+│   │   └── search/         # Search across different APIs
+│   ├── media/[id]/         # Detail view for individual items
+│   ├── layout.tsx          # Root layout
+│   ├── page.tsx            # Home page with grid view
+│   └── globals.css         # Global styles
+├── components/
+│   ├── ui/                 # shadcn/ui components
+│   ├── add-media-dialog.tsx
+│   ├── filter-bar.tsx
+│   ├── media-card.tsx
+│   └── media-grid.tsx
+├── lib/
+│   ├── prisma.ts           # Prisma client
+│   └── utils.ts            # Utility functions
+├── prisma/
+│   └── schema.prisma       # Database schema
+└── README.md
+```
+
+## Future Enhancements
+
+See PRD.md for planned features including:
+- User authentication
+- Custom tagging system
+- Stats and analytics
+- Public sharing
+- Advanced search and sorting
+- Custom entries for media not in APIs
+
+## License
+
+ISC
