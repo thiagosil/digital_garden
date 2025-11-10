@@ -1,11 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { MediaGrid } from '@/components/media-grid';
-import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
-import { AddMediaDialog } from '@/components/add-media-dialog';
-import { FilterBar } from '@/components/filter-bar';
+import { BookshelfTabs } from '@/components/bookshelf-tabs';
 
 interface MediaItem {
   id: string;
@@ -18,11 +16,11 @@ interface MediaItem {
 }
 
 export default function Home() {
+  const searchParams = useSearchParams();
   const [items, setItems] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [statusFilter, setStatusFilter] = useState<string | null>(null);
-  const [typeFilter, setTypeFilter] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string | null>('COMPLETED');
+  const [typeFilter, setTypeFilter] = useState<string | null>(searchParams.get('type') || 'BOOK');
 
   const fetchItems = async () => {
     setLoading(true);
@@ -50,41 +48,68 @@ export default function Home() {
   };
 
   useEffect(() => {
+    const typeFromUrl = searchParams.get('type') || 'BOOK';
+    setTypeFilter(typeFromUrl);
+  }, [searchParams]);
+
+  useEffect(() => {
     fetchItems();
   }, [statusFilter, typeFilter]);
 
-  const handleItemAdded = () => {
-    fetchItems();
-    setIsAddDialogOpen(false);
+  // Dynamic content based on media type
+  const getPageContent = () => {
+    switch (typeFilter) {
+      case 'BOOK':
+        return {
+          title: 'Bookshelf',
+          description: 'Books I\'ve read, with reviews and notes. Each cover links to a longer take.'
+        };
+      case 'MOVIE':
+        return {
+          title: 'Movies',
+          description: 'Movies I\'ve watched, with reviews and thoughts. Each poster links to a longer take.'
+        };
+      case 'TV_SHOW':
+        return {
+          title: 'TV Shows',
+          description: 'TV shows I\'ve watched, with reviews and thoughts. Each poster links to a longer take.'
+        };
+      case 'VIDEO_GAME':
+        return {
+          title: 'Games',
+          description: 'Video games I\'ve played, with reviews and thoughts. Each cover links to a longer take.'
+        };
+      default:
+        return {
+          title: 'Bookshelf',
+          description: 'Books I\'ve read, with reviews and notes. Each cover links to a longer take.'
+        };
+    }
   };
+
+  const pageContent = getPageContent();
 
   return (
     <main className="min-h-screen bg-background">
-      <div className="max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-12 py-12 sm:py-16">
+      <div className="max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-12 py-16 sm:py-20">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-6 mb-12 sm:mb-16">
-          <div className="space-y-3">
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight">Media Garden</h1>
-            <p className="text-muted-foreground text-base sm:text-lg max-w-2xl font-light">
-              Your personal collection of books, movies, shows, and games
+        <div className="mb-12 sm:mb-16">
+          <div className="space-y-4">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              LIBRARY
+            </p>
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight">{pageContent.title}</h1>
+            <p className="text-muted-foreground text-base sm:text-lg max-w-3xl font-light">
+              {pageContent.description}
             </p>
           </div>
-          <Button
-            onClick={() => setIsAddDialogOpen(true)}
-            size="lg"
-            className="shrink-0 w-full sm:w-auto"
-          >
-            <Plus className="mr-2 h-5 w-5" />
-            Add Media
-          </Button>
         </div>
 
-        {/* Filters */}
-        <FilterBar
-          statusFilter={statusFilter}
-          typeFilter={typeFilter}
-          onStatusFilterChange={setStatusFilter}
-          onTypeFilterChange={setTypeFilter}
+        {/* Tabs */}
+        <BookshelfTabs
+          activeTab={statusFilter}
+          onTabChange={setStatusFilter}
+          mediaType={typeFilter || 'BOOK'}
         />
 
         {/* Grid */}
@@ -95,13 +120,6 @@ export default function Home() {
         ) : (
           <MediaGrid items={items} />
         )}
-
-        {/* Add Media Dialog */}
-        <AddMediaDialog
-          open={isAddDialogOpen}
-          onOpenChange={setIsAddDialogOpen}
-          onItemAdded={handleItemAdded}
-        />
       </div>
     </main>
   );

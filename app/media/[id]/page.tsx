@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
@@ -29,7 +29,8 @@ interface MediaItem {
   completedAt: Date | null;
 }
 
-export default function MediaDetailPage({ params }: { params: { id: string } }) {
+export default function MediaDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const router = useRouter();
   const [item, setItem] = useState<MediaItem | null>(null);
   const [loading, setLoading] = useState(true);
@@ -40,11 +41,11 @@ export default function MediaDetailPage({ params }: { params: { id: string } }) 
 
   useEffect(() => {
     fetchItem();
-  }, [params.id]);
+  }, [id]);
 
   const fetchItem = async () => {
     try {
-      const response = await fetch(`/api/media/${params.id}`);
+      const response = await fetch(`/api/media/${id}`);
       const data = await response.json();
       setItem(data.item);
       setStatus(data.item.status);
@@ -76,7 +77,7 @@ export default function MediaDetailPage({ params }: { params: { id: string } }) 
         body.completedAt = null;
       }
 
-      const response = await fetch(`/api/media/${params.id}`, {
+      const response = await fetch(`/api/media/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -107,7 +108,7 @@ export default function MediaDetailPage({ params }: { params: { id: string } }) 
     }
 
     try {
-      const response = await fetch(`/api/media/${params.id}`, {
+      const response = await fetch(`/api/media/${id}`, {
         method: 'DELETE',
       });
 
@@ -145,7 +146,7 @@ export default function MediaDetailPage({ params }: { params: { id: string } }) 
         <Link href="/" className="inline-block mb-8 sm:mb-12">
           <Button variant="ghost" size="sm" className="font-medium">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Garden
+            Back to Library
           </Button>
         </Link>
 
