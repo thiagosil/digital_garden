@@ -1,9 +1,10 @@
-# Media Garden
+# Echo
 
-A personal digital garden for tracking books, movies, TV shows, and video games. Built with Next.js, TypeScript, Tailwind CSS, and shadcn/ui.
+A private digital garden for tracking books, movies, TV shows, and video games. Built with Next.js, TypeScript, Tailwind CSS, and shadcn/ui.
 
 ## Features
 
+- **Authentication**: Simple email/password login for single-user private digital garden
 - **Add Media**: Search and add books, movies, TV shows, and video games to your collection
 - **Automatic Metadata**: Fetches cover art, synopsis, and creator info from public APIs
 - **Status Tracking**: Organize media by Backlog, In Progress, or Completed
@@ -48,6 +49,10 @@ Create a `.env` file in the root directory:
 ```env
 DATABASE_URL="file:./prisma/dev.db"
 
+# Authentication (required)
+JWT_SECRET="your-secret-key-change-this-in-production"
+# Generate a secure secret: openssl rand -base64 32
+
 # API Keys (optional but recommended)
 TMDB_API_KEY="your_tmdb_api_key"
 RAWG_API_KEY="your_rawg_api_key"
@@ -58,14 +63,21 @@ To get API keys:
 - TMDB: https://www.themoviedb.org/settings/api
 - RAWG: https://rawg.io/apidocs
 
-4. Run the development server:
+4. Create your admin user:
+```bash
+npm run create-user
+```
+
+You'll be prompted to enter your email and password. This is the account you'll use to log in.
+
+5. Run the development server:
 ```bash
 npm run dev
 ```
 
-5. Open [http://localhost:3000](http://localhost:3000) in your browser
+6. Open [http://localhost:3000](http://localhost:3000) in your browser
 
-The database will be automatically initialized on first run.
+You'll be redirected to the login page. Use the credentials you created in step 4.
 
 ## Deployment
 
@@ -103,8 +115,16 @@ Use the filter buttons at the top of the page to:
 
 ## Database Schema
 
-The app uses a simple database schema with a single `MediaItem` model:
+The app uses two main models:
 
+### User Model
+- `id`: Unique identifier
+- `email`: User's email (unique)
+- `password`: Hashed password
+- `createdAt`: Account creation date
+- `updatedAt`: Last update date
+
+### MediaItem Model
 - `id`: Unique identifier
 - `title`: Title of the media
 - `mediaType`: BOOK, MOVIE, TV_SHOW, or VIDEO_GAME
@@ -122,8 +142,13 @@ The app uses a simple database schema with a single `MediaItem` model:
 digital_garden/
 ├── app/
 │   ├── api/
+│   │   ├── auth/           # Authentication endpoints
+│   │   │   ├── login/      # Login route
+│   │   │   ├── logout/     # Logout route
+│   │   │   └── me/         # Current user session
 │   │   ├── media/          # CRUD operations for media items
 │   │   └── search/         # Search across different APIs
+│   ├── login/              # Login page
 │   ├── media/[id]/         # Detail view for individual items
 │   ├── layout.tsx          # Root layout
 │   ├── page.tsx            # Home page with grid view
@@ -133,19 +158,42 @@ digital_garden/
 │   ├── add-media-dialog.tsx
 │   ├── filter-bar.tsx
 │   ├── media-card.tsx
-│   └── media-grid.tsx
+│   ├── media-grid.tsx
+│   └── navigation-header.tsx
 ├── lib/
+│   ├── auth.ts             # Authentication utilities
 │   ├── db.ts               # Database client and queries
 │   └── utils.ts            # Utility functions
 ├── prisma/
 │   └── schema.prisma       # Database schema reference
+├── scripts/
+│   └── create-user.ts      # Script to create admin user
+├── middleware.ts           # Auth middleware to protect routes
 └── README.md
 ```
+
+## Authentication
+
+This digital garden is designed for **single-user private use**. After creating your account with `npm run create-user`, all routes are protected by authentication middleware.
+
+### Security Features
+- Passwords are hashed using bcryptjs
+- Sessions are managed with JWT tokens stored in httpOnly cookies
+- Tokens expire after 7 days
+- All routes except `/login` require authentication
+
+### Creating Additional Users
+
+To create additional users, use the same command:
+```bash
+npm run create-user
+```
+
+Note: This app is designed for single-user use, but you can create multiple accounts if needed.
 
 ## Future Enhancements
 
 See PRD.md for planned features including:
-- User authentication
 - Custom tagging system
 - Stats and analytics
 - Public sharing

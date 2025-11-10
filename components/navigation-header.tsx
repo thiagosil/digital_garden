@@ -1,10 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
-import { Plus } from 'lucide-react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { Plus, LogOut } from 'lucide-react';
 import { Drop } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
+import { useState } from 'react';
 
 interface NavigationHeaderProps {
   onAddMedia?: () => void;
@@ -12,7 +13,21 @@ interface NavigationHeaderProps {
 
 export function NavigationHeader({ onAddMedia }: NavigationHeaderProps) {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const activeType = searchParams.get('type') || 'BOOK';
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      router.push('/login');
+      router.refresh();
+    } catch (error) {
+      console.error('Logout error:', error);
+      setIsLoggingOut(false);
+    }
+  };
 
   return (
     <header className="border-b border-border bg-background">
@@ -62,16 +77,28 @@ export function NavigationHeader({ onAddMedia }: NavigationHeaderProps) {
             </Link>
           </nav>
 
-          {/* Add Media Button */}
-          <Button
-            onClick={onAddMedia}
-            variant="ghost"
-            size="sm"
-            className="shrink-0 text-sm font-medium hover:text-foreground"
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Add Media
-          </Button>
+          {/* Add Media Button & Logout */}
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={onAddMedia}
+              variant="ghost"
+              size="sm"
+              className="shrink-0 text-sm font-medium hover:text-foreground"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Add Media
+            </Button>
+            <Button
+              onClick={handleLogout}
+              variant="ghost"
+              size="sm"
+              className="shrink-0 text-sm font-medium hover:text-foreground"
+              disabled={isLoggingOut}
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              {isLoggingOut ? 'Logging out...' : 'Logout'}
+            </Button>
+          </div>
         </div>
       </div>
     </header>
