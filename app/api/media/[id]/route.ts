@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { mediaQueries } from '@/lib/db';
 
 // GET single media item
 export async function GET(
@@ -7,9 +7,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const item = await prisma.mediaItem.findUnique({
-      where: { id: params.id },
-    });
+    const item = mediaQueries.findUnique(params.id);
 
     if (!item) {
       return NextResponse.json(
@@ -41,13 +39,6 @@ export async function PATCH(
 
     if (status !== undefined) {
       updateData.status = status;
-
-      // Auto-set completedAt when status changes to COMPLETED
-      if (status === 'COMPLETED' && !completedAt) {
-        updateData.completedAt = new Date();
-      } else if (status !== 'COMPLETED') {
-        updateData.completedAt = null;
-      }
     }
 
     if (notes !== undefined) {
@@ -55,13 +46,10 @@ export async function PATCH(
     }
 
     if (completedAt !== undefined) {
-      updateData.completedAt = completedAt ? new Date(completedAt) : null;
+      updateData.completedAt = completedAt;
     }
 
-    const item = await prisma.mediaItem.update({
-      where: { id: params.id },
-      data: updateData,
-    });
+    const item = mediaQueries.update(params.id, updateData);
 
     return NextResponse.json({ item });
   } catch (error) {
@@ -79,9 +67,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    await prisma.mediaItem.delete({
-      where: { id: params.id },
-    });
+    mediaQueries.delete(params.id);
 
     return NextResponse.json({ success: true });
   } catch (error) {

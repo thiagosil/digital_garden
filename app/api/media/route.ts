@@ -1,29 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { mediaQueries } from '@/lib/db';
 
 // GET all media items with optional filtering
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
-    const status = searchParams.get('status');
-    const mediaType = searchParams.get('mediaType');
+    const status = searchParams.get('status') || undefined;
+    const mediaType = searchParams.get('mediaType') || undefined;
 
     const where: any = {};
+    if (status) where.status = status;
+    if (mediaType) where.mediaType = mediaType;
 
-    if (status) {
-      where.status = status;
-    }
-
-    if (mediaType) {
-      where.mediaType = mediaType;
-    }
-
-    const items = await prisma.mediaItem.findMany({
-      where,
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
+    const items = mediaQueries.findMany(where);
 
     return NextResponse.json({ items });
   } catch (error) {
@@ -48,16 +37,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const item = await prisma.mediaItem.create({
-      data: {
-        title,
-        mediaType,
-        coverImage,
-        creator,
-        synopsis,
-        apiId,
-        status: 'BACKLOG',
-      },
+    const item = mediaQueries.create({
+      title,
+      mediaType,
+      coverImage,
+      creator,
+      synopsis,
+      apiId,
     });
 
     return NextResponse.json({ item }, { status: 201 });
