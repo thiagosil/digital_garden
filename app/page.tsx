@@ -60,17 +60,21 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-background">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-12 py-12 sm:py-16">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-4xl font-bold tracking-tight">Media Garden</h1>
-            <p className="text-muted-foreground mt-2">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-6 mb-12 sm:mb-16">
+          <div className="space-y-3">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight">Media Garden</h1>
+            <p className="text-muted-foreground text-base sm:text-lg max-w-2xl font-light">
               Your personal collection of books, movies, shows, and games
             </p>
           </div>
-          <Button onClick={() => setIsAddDialogOpen(true)} size="lg">
-            <Plus className="mr-2 h-4 w-4" />
+          <Button
+            onClick={() => setIsAddDialogOpen(true)}
+            size="lg"
+            className="shrink-0 w-full sm:w-auto"
+          >
+            <Plus className="mr-2 h-5 w-5" />
             Add Media
           </Button>
         </div>
@@ -85,8 +89,8 @@ export default function Home() {
 
         {/* Grid */}
         {loading ? (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">Loading...</p>
+          <div className="text-center py-20">
+            <p className="text-muted-foreground text-lg font-light">Loading...</p>
           </div>
         ) : (
           <MediaGrid items={items} />
