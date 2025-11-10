@@ -54,13 +54,13 @@ export const mediaQueries = {
     query += ' ORDER BY createdAt DESC';
 
     const result = await db.execute({ sql: query, args: params });
-    return result.rows as MediaItem[];
+    return result.rows as unknown as MediaItem[];
   },
 
   findUnique: async (id: string): Promise<MediaItem | undefined> => {
     const db = getDb();
     const result = await db.execute({ sql: 'SELECT * FROM MediaItem WHERE id = ?', args: [id] });
-    return result.rows[0] as MediaItem | undefined;
+    return result.rows[0] as unknown as MediaItem | undefined;
   },
 
   create: async (data: {
