@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import { ArrowLeft, Save, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -35,6 +36,7 @@ export default function MediaDetailPage({ params }: { params: { id: string } }) 
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState('');
   const [notes, setNotes] = useState('');
+  const [completedAt, setCompletedAt] = useState('');
 
   useEffect(() => {
     fetchItem();
@@ -47,6 +49,14 @@ export default function MediaDetailPage({ params }: { params: { id: string } }) 
       setItem(data.item);
       setStatus(data.item.status);
       setNotes(data.item.notes || '');
+
+      // Format completedAt for input[type="date"]
+      if (data.item.completedAt) {
+        const date = new Date(data.item.completedAt);
+        setCompletedAt(date.toISOString().split('T')[0]);
+      } else {
+        setCompletedAt('');
+      }
     } catch (error) {
       console.error('Failed to fetch item:', error);
     } finally {
@@ -57,15 +67,32 @@ export default function MediaDetailPage({ params }: { params: { id: string } }) 
   const handleSave = async () => {
     setSaving(true);
     try {
+      const body: any = { status, notes };
+
+      // Include completedAt only if it's set and status is COMPLETED
+      if (status === 'COMPLETED' && completedAt) {
+        body.completedAt = new Date(completedAt).toISOString();
+      } else if (status !== 'COMPLETED') {
+        body.completedAt = null;
+      }
+
       const response = await fetch(`/api/media/${params.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status, notes }),
+        body: JSON.stringify(body),
       });
 
       if (response.ok) {
         const data = await response.json();
         setItem(data.item);
+
+        // Update local state with returned data
+        if (data.item.completedAt) {
+          const date = new Date(data.item.completedAt);
+          setCompletedAt(date.toISOString().split('T')[0]);
+        } else {
+          setCompletedAt('');
+        }
       }
     } catch (error) {
       console.error('Failed to update item:', error);
@@ -157,9 +184,16 @@ export default function MediaDetailPage({ params }: { params: { id: string } }) 
             </div>
 
             {/* Completion Date */}
-            {item.completedAt && (
-              <div className="text-sm text-muted-foreground">
-                Completed: {new Date(item.completedAt).toLocaleDateString()}
+            {status === 'COMPLETED' && (
+              <div className="space-y-2">
+                <Label htmlFor="completedAt">Completion Date</Label>
+                <Input
+                  id="completedAt"
+                  type="date"
+                  value={completedAt}
+                  onChange={(e) => setCompletedAt(e.target.value)}
+                  className="w-full"
+                />
               </div>
             )}
           </div>
