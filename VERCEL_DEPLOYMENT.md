@@ -1,12 +1,8 @@
 # Deploying to Vercel
 
-This app uses SQLite with better-sqlite3, which **does not work on Vercel's serverless platform**. You need to migrate to a cloud database first.
+This app has been configured to use **Turso**, a SQLite-compatible edge database that works perfectly with Vercel's serverless platform.
 
-## Option 1: Use Turso (Recommended - SQLite Compatible)
-
-Turso is a SQLite-compatible edge database that works great with Vercel and requires minimal code changes.
-
-### Steps:
+## Setup Turso Database
 
 1. **Create a Turso account and database:**
    ```bash
@@ -26,95 +22,89 @@ Turso is a SQLite-compatible edge database that works great with Vercel and requ
    turso db tokens create digital-garden
    ```
 
-2. **Update your dependencies:**
+2. **Initialize your database schema:**
    ```bash
-   npm install @libsql/client
-   npm uninstall better-sqlite3
+   # Get the Turso database URL from the previous step
+   export DATABASE_URL="libsql://[your-database].turso.io"
+   export TURSO_AUTH_TOKEN="your-token-here"
+
+   # Push the Prisma schema to Turso
+   npx prisma db push
    ```
 
-3. **Update lib/db.ts to use Turso:**
-   Replace the better-sqlite3 implementation with @libsql/client
+## Deploy to Vercel
 
-4. **Update Prisma schema (prisma/schema.prisma):**
-   ```prisma
-   datasource db {
-     provider = "sqlite"
-     url      = env("DATABASE_URL")
-   }
-   ```
-
-5. **Deploy to Vercel:**
+1. **Install Vercel CLI (if not already installed):**
    ```bash
-   # Install Vercel CLI
    npm i -g vercel
+   ```
 
-   # Login
+2. **Login to Vercel:**
+   ```bash
    vercel login
-
-   # Deploy
-   vercel
    ```
 
-6. **Set environment variables in Vercel:**
-   - Go to your project settings in Vercel dashboard
-   - Add `DATABASE_URL` with your Turso database URL
-   - Add `TURSO_AUTH_TOKEN` with your auth token
-
-## Option 2: Use Vercel Postgres
-
-1. **Enable Vercel Postgres:**
-   - Go to your Vercel project dashboard
-   - Navigate to Storage tab
-   - Create a Postgres database
-
-2. **Update Prisma schema:**
-   ```prisma
-   datasource db {
-     provider = "postgresql"
-     url      = env("DATABASE_URL")
-   }
-   ```
-
-3. **Migrate your code:**
-   - Remove lib/db.ts (better-sqlite3)
-   - Use lib/prisma.ts instead
-   - Update all API routes to use Prisma Client
-   - Run `npx prisma generate`
-   - Run `npx prisma db push`
-
-4. **Deploy:**
+3. **Deploy:**
    ```bash
    vercel
    ```
 
-## Option 3: Deploy to a Different Platform
+4. **Set environment variables in Vercel:**
+   - Go to your project settings in Vercel dashboard
+   - Navigate to Environment Variables
+   - Add the following variables:
+     - `DATABASE_URL` = Your Turso database URL (e.g., `libsql://digital-garden-xxx.turso.io`)
+     - `TURSO_AUTH_TOKEN` = Your Turso auth token
 
-If you want to keep using SQLite with better-sqlite3, consider these platforms:
-- **Railway**: Supports persistent storage
-- **Fly.io**: Supports volumes for SQLite
-- **Render**: Supports persistent disks
+5. **Redeploy after setting environment variables:**
+   ```bash
+   vercel --prod
+   ```
 
-## Quick Deploy (after choosing a database solution)
+## Local Development
+
+For local development, you can use a local SQLite file:
 
 ```bash
-# Build locally to test
-npm run build
+# Create a .env file
+cp .env.example .env
 
-# Deploy to Vercel
-vercel
+# The DATABASE_URL is already set to file:./prisma/dev.db
+# Initialize your local database
+npx prisma db push
 
-# For production deployment
-vercel --prod
+# Start development server
+npm run dev
 ```
 
-## Environment Variables
+## Troubleshooting
 
-Make sure to set these in your Vercel project settings:
-- `DATABASE_URL`: Your database connection string
+### Database Connection Issues
 
-## Post-Deployment
+If you see database errors after deployment:
+1. Verify your environment variables are set correctly in Vercel
+2. Ensure the Turso auth token has not expired
+3. Check that your Turso database is active
+
+### Schema Migrations
+
+To update your database schema:
+```bash
+# Update prisma/schema.prisma
+# Then push changes to Turso
+npx prisma db push
+```
+
+## Post-Deployment Checklist
 
 After deployment:
-1. Run database migrations if needed
-2. Test all API endpoints
-3. Verify media search and CRUD operations work correctly
+- ✅ Test all API endpoints (`/api/media`, `/api/media/[id]`, `/api/search`)
+- ✅ Verify media search functionality
+- ✅ Test CRUD operations (Create, Read, Update, Delete)
+- ✅ Check image loading from external sources (TMDB, Google Books, RAWG)
+
+## Additional Resources
+
+- [Turso Documentation](https://docs.turso.tech/)
+- [Vercel Deployment Docs](https://vercel.com/docs)
+- [Next.js Deployment](https://nextjs.org/docs/deployment)

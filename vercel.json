@@ -3,6 +3,7 @@
   "framework": "nextjs",
   "installCommand": "npm install",
   "env": {
-    "DATABASE_URL": "@database_url"
+    "DATABASE_URL": "@database_url",
+    "TURSO_AUTH_TOKEN": "@turso_auth_token"
   }
 }

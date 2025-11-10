@@ -7,7 +7,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const item = mediaQueries.findUnique(params.id);
+    const item = await mediaQueries.findUnique(params.id);
 
     if (!item) {
       return NextResponse.json(
@@ -49,7 +49,7 @@ export async function PATCH(
       updateData.completedAt = completedAt;
     }
 
-    const item = mediaQueries.update(params.id, updateData);
+    const item = await mediaQueries.update(params.id, updateData);
 
     return NextResponse.json({ item });
   } catch (error) {
@@ -67,7 +67,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    mediaQueries.delete(params.id);
+    await mediaQueries.delete(params.id);
 
     return NextResponse.json({ success: true });
   } catch (error) {
