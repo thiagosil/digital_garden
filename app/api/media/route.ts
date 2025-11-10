@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     if (status) where.status = status;
     if (mediaType) where.mediaType = mediaType;
 
-    const items = mediaQueries.findMany(where);
+    const items = await mediaQueries.findMany(where);
 
     return NextResponse.json({ items });
   } catch (error) {
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const item = mediaQueries.create({
+    const item = await mediaQueries.create({
       title,
       mediaType,
       coverImage,

@@ -1,13 +1,17 @@
-import Database from 'better-sqlite3';
-import path from 'path';
+import { createClient, Client } from '@libsql/client';
 
-let db: Database.Database | null = null;
+let db: Client | null = null;
 
 export function getDb() {
   if (!db) {
-    const dbPath = path.join(process.cwd(), 'prisma', 'dev.db');
-    db = new Database(dbPath);
-    db.pragma('journal_mode = WAL');
+    // Support both local SQLite files and Turso remote databases
+    const url = process.env.DATABASE_URL || 'file:./prisma/dev.db';
+    const authToken = process.env.TURSO_AUTH_TOKEN;
+
+    db = createClient({
+      url,
+      authToken,
+    });
   }
   return db;
 }
@@ -32,7 +36,7 @@ function generateId() {
 }
 
 export const mediaQueries = {
-  findMany: (where?: { status?: string; mediaType?: string }): MediaItem[] => {
+  findMany: async (where?: { status?: string; mediaType?: string }): Promise<MediaItem[]> => {
     const db = getDb();
     let query = 'SELECT * FROM MediaItem WHERE 1=1';
     const params: any[] = [];
@@ -49,52 +53,55 @@ export const mediaQueries = {
 
     query += ' ORDER BY createdAt DESC';
 
-    return db.prepare(query).all(...params) as MediaItem[];
+    const result = await db.execute({ sql: query, args: params });
+    return result.rows as MediaItem[];
   },
 
-  findUnique: (id: string): MediaItem | undefined => {
+  findUnique: async (id: string): Promise<MediaItem | undefined> => {
     const db = getDb();
-    return db.prepare('SELECT * FROM MediaItem WHERE id = ?').get(id) as MediaItem | undefined;
+    const result = await db.execute({ sql: 'SELECT * FROM MediaItem WHERE id = ?', args: [id] });
+    return result.rows[0] as MediaItem | undefined;
   },
 
-  create: (data: {
+  create: async (data: {
     title: string;
     mediaType: string;
     coverImage?: string;
     creator?: string;
     synopsis?: string;
     apiId?: string;
-  }): MediaItem => {
+  }): Promise<MediaItem> => {
     const db = getDb();
     const id = generateId();
     const now = new Date().toISOString();
 
-    const stmt = db.prepare(`
-      INSERT INTO MediaItem (id, title, mediaType, status, coverImage, creator, synopsis, apiId, createdAt, updatedAt)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `);
+    await db.execute({
+      sql: `
+        INSERT INTO MediaItem (id, title, mediaType, status, coverImage, creator, synopsis, apiId, createdAt, updatedAt)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `,
+      args: [
+        id,
+        data.title,
+        data.mediaType,
+        'BACKLOG',
+        data.coverImage || null,
+        data.creator || null,
+        data.synopsis || null,
+        data.apiId || null,
+        now,
+        now
+      ]
+    });
 
-    stmt.run(
-      id,
-      data.title,
-      data.mediaType,
-      'BACKLOG',
-      data.coverImage || null,
-      data.creator || null,
-      data.synopsis || null,
-      data.apiId || null,
-      now,
-      now
-    );
-
-    return mediaQueries.findUnique(id)!;
+    return (await mediaQueries.findUnique(id))!;
   },
 
-  update: (id: string, data: {
+  update: async (id: string, data: {
     status?: string;
     notes?: string;
     completedAt?: string | null;
-  }): MediaItem => {
+  }): Promise<MediaItem> => {
     const db = getDb();
     const now = new Date().toISOString();
 
@@ -127,19 +134,20 @@ export const mediaQueries = {
 
     params.push(id);
 
-    const stmt = db.prepare(`
-      UPDATE MediaItem
-      SET ${updates.join(', ')}
-      WHERE id = ?
-    `);
+    await db.execute({
+      sql: `
+        UPDATE MediaItem
+        SET ${updates.join(', ')}
+        WHERE id = ?
+      `,
+      args: params
+    });
 
-    stmt.run(...params);
-
-    return mediaQueries.findUnique(id)!;
+    return (await mediaQueries.findUnique(id))!;
   },
 
-  delete: (id: string): void => {
+  delete: async (id: string): Promise<void> => {
     const db = getDb();
-    db.prepare('DELETE FROM MediaItem WHERE id = ?').run(id);
+    await db.execute({ sql: 'DELETE FROM MediaItem WHERE id = ?', args: [id] });
   },
 };
