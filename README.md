@@ -17,7 +17,7 @@ A personal digital garden for tracking books, movies, TV shows, and video games.
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
 - **Components**: shadcn/ui
-- **Database**: Prisma + SQLite
+- **Database**: Turso/SQLite with @libsql/client
 - **APIs**:
   - Google Books API (Books)
   - TMDB API (Movies & TV Shows)
@@ -46,7 +46,7 @@ npm install
 3. Set up environment variables:
 Create a `.env` file in the root directory:
 ```env
-DATABASE_URL="file:./dev.db"
+DATABASE_URL="file:./prisma/dev.db"
 
 # API Keys (optional but recommended)
 TMDB_API_KEY="your_tmdb_api_key"
@@ -58,18 +58,25 @@ To get API keys:
 - TMDB: https://www.themoviedb.org/settings/api
 - RAWG: https://rawg.io/apidocs
 
-4. Generate Prisma Client and create the database:
-```bash
-npx prisma generate
-npx prisma db push
-```
-
-5. Run the development server:
+4. Run the development server:
 ```bash
 npm run dev
 ```
 
-6. Open [http://localhost:3000](http://localhost:3000) in your browser
+5. Open [http://localhost:3000](http://localhost:3000) in your browser
+
+The database will be automatically initialized on first run.
+
+## Deployment
+
+### Deploy to Vercel
+
+For detailed instructions on deploying to Vercel with Turso database, see [VERCEL_SETUP.md](./VERCEL_SETUP.md).
+
+Quick steps:
+1. Create a Turso database
+2. Deploy to Vercel and add environment variables (`DATABASE_URL` and `TURSO_AUTH_TOKEN`)
+3. The database schema will be automatically initialized on first deployment
 
 ## Usage
 
@@ -128,10 +135,10 @@ digital_garden/
 │   ├── media-card.tsx
 │   └── media-grid.tsx
 ├── lib/
-│   ├── prisma.ts           # Prisma client
+│   ├── db.ts               # Database client and queries
 │   └── utils.ts            # Utility functions
 ├── prisma/
-│   └── schema.prisma       # Database schema
+│   └── schema.prisma       # Database schema reference
 └── README.md
 ```
 
