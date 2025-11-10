@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { mediaQueries } from '@/lib/db';
+import { mediaQueries, initializeDb } from '@/lib/db';
 
 // GET single media item
 export async function GET(
@@ -7,6 +7,9 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Ensure database is initialized
+    await initializeDb();
+
     const { id } = await params;
     const item = await mediaQueries.findUnique(id);
 
@@ -33,6 +36,9 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Ensure database is initialized
+    await initializeDb();
+
     const { id } = await params;
     const body = await request.json();
     const { status, notes, completedAt } = body;
@@ -69,6 +75,9 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Ensure database is initialized
+    await initializeDb();
+
     const { id } = await params;
     await mediaQueries.delete(id);
 
