@@ -4,10 +4,11 @@ import { mediaQueries } from '@/lib/db';
 // GET single media item
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const item = await mediaQueries.findUnique(params.id);
+    const { id } = await params;
+    const item = await mediaQueries.findUnique(id);
 
     if (!item) {
       return NextResponse.json(
@@ -29,9 +30,10 @@ export async function GET(
 // PATCH - Update a media item
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const body = await request.json();
     const { status, notes, completedAt } = body;
 
@@ -49,7 +51,7 @@ export async function PATCH(
       updateData.completedAt = completedAt;
     }
 
-    const item = await mediaQueries.update(params.id, updateData);
+    const item = await mediaQueries.update(id, updateData);
 
     return NextResponse.json({ item });
   } catch (error) {
@@ -64,10 +66,11 @@ export async function PATCH(
 // DELETE - Remove a media item
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await mediaQueries.delete(params.id);
+    const { id } = await params;
+    await mediaQueries.delete(id);
 
     return NextResponse.json({ success: true });
   } catch (error) {
