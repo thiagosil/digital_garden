@@ -33,9 +33,17 @@ export default function Home() {
 
       const response = await fetch(`/api/media?${params.toString()}`);
       const data = await response.json();
-      setItems(data.items);
+
+      // Check if the response is successful and has items
+      if (response.ok && data.items) {
+        setItems(data.items);
+      } else {
+        console.error('Failed to fetch items:', data.error || 'Unknown error');
+        setItems([]);
+      }
     } catch (error) {
       console.error('Failed to fetch items:', error);
+      setItems([]);
     } finally {
       setLoading(false);
     }

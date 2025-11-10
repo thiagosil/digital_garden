@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { mediaQueries } from '@/lib/db';
+import { mediaQueries, initializeDb } from '@/lib/db';
 
 // GET all media items with optional filtering
 export async function GET(request: NextRequest) {
   try {
+    // Ensure database is initialized
+    await initializeDb();
+
     const searchParams = request.nextUrl.searchParams;
     const status = searchParams.get('status') || undefined;
     const mediaType = searchParams.get('mediaType') || undefined;
@@ -27,6 +30,9 @@ export async function GET(request: NextRequest) {
 // POST - Create a new media item
 export async function POST(request: NextRequest) {
   try {
+    // Ensure database is initialized
+    await initializeDb();
+
     const body = await request.json();
     const { title, mediaType, coverImage, creator, synopsis, apiId } = body;
 

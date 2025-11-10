@@ -1,6 +1,7 @@
 import { createClient, Client } from '@libsql/client';
 
 let db: Client | null = null;
+let dbInitialized = false;
 
 export function getDb() {
   if (!db) {
@@ -14,6 +15,50 @@ export function getDb() {
     });
   }
   return db;
+}
+
+// Initialize database schema if it doesn't exist
+export async function initializeDb() {
+  if (dbInitialized) return;
+
+  const db = getDb();
+
+  try {
+    // Check if MediaItem table exists by trying to query it
+    await db.execute({ sql: 'SELECT 1 FROM MediaItem LIMIT 1', args: [] });
+    dbInitialized = true;
+  } catch (error) {
+    // Table doesn't exist, create it
+    console.log('MediaItem table not found, creating...');
+
+    try {
+      await db.execute({
+        sql: `
+          CREATE TABLE IF NOT EXISTS MediaItem (
+            id TEXT PRIMARY KEY NOT NULL,
+            title TEXT NOT NULL,
+            mediaType TEXT NOT NULL,
+            status TEXT NOT NULL DEFAULT 'BACKLOG',
+            coverImage TEXT,
+            creator TEXT,
+            synopsis TEXT,
+            notes TEXT,
+            completedAt TEXT,
+            createdAt TEXT NOT NULL,
+            updatedAt TEXT NOT NULL,
+            apiId TEXT
+          )
+        `,
+        args: []
+      });
+
+      dbInitialized = true;
+      console.log('MediaItem table created successfully');
+    } catch (createError) {
+      console.error('Failed to create MediaItem table:', createError);
+      throw createError;
+    }
+  }
 }
 
 export interface MediaItem {
@@ -54,13 +99,13 @@ export const mediaQueries = {
     query += ' ORDER BY createdAt DESC';
 
     const result = await db.execute({ sql: query, args: params });
-    return result.rows as MediaItem[];
+    return result.rows as unknown as MediaItem[];
   },
 
   findUnique: async (id: string): Promise<MediaItem | undefined> => {
     const db = getDb();
     const result = await db.execute({ sql: 'SELECT * FROM MediaItem WHERE id = ?', args: [id] });
-    return result.rows[0] as MediaItem | undefined;
+    return result.rows[0] as unknown as MediaItem | undefined;
   },
 
   create: async (data: {
