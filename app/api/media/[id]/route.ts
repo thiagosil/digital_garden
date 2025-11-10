@@ -47,6 +47,20 @@ export async function PATCH(
 
     if (status !== undefined) {
       updateData.status = status;
+
+      // Auto-set completedAt when status changes to COMPLETED
+      if (status === 'COMPLETED' && completedAt === undefined) {
+        // Get current item to check if completedAt is already set
+        const currentItem = await mediaQueries.findUnique(id);
+        if (!currentItem?.completedAt) {
+          updateData.completedAt = new Date().toISOString();
+        }
+      }
+
+      // Clear completedAt when status changes away from COMPLETED
+      if (status !== 'COMPLETED' && completedAt === undefined) {
+        updateData.completedAt = null;
+      }
     }
 
     if (notes !== undefined) {
