@@ -22,6 +22,10 @@ export default function MediaDetailPage({ params }: { params: Promise<{ id: stri
   const [notes, setNotes] = useState('');
   const [rating, setRating] = useState<number | null>(null);
   const [completedAt, setCompletedAt] = useState('');
+  const [currentSeason, setCurrentSeason] = useState<number>(1);
+  const [currentEpisode, setCurrentEpisode] = useState<number>(1);
+  const [totalSeasons, setTotalSeasons] = useState<number | null>(null);
+  const [episodesInSeason, setEpisodesInSeason] = useState<number | null>(null);
 
   useEffect(() => {
     fetchItem();
@@ -35,6 +39,12 @@ export default function MediaDetailPage({ params }: { params: Promise<{ id: stri
       setStatus(data.item.status);
       setNotes(data.item.notes || '');
       setRating(data.item.rating || null);
+
+      // TV show progress
+      setCurrentSeason(data.item.currentSeason || 1);
+      setCurrentEpisode(data.item.currentEpisode || 1);
+      setTotalSeasons(data.item.totalSeasons || null);
+      setEpisodesInSeason(data.item.episodesInSeason || null);
 
       // Format completedAt for input[type="date"]
       if (data.item.completedAt) {
@@ -60,6 +70,14 @@ export default function MediaDetailPage({ params }: { params: Promise<{ id: stri
         body.completedAt = new Date(completedAt).toISOString();
       } else if (status !== 'COMPLETED') {
         body.completedAt = null;
+      }
+
+      // Include TV show progress for TV shows
+      if (item?.mediaType === 'TV_SHOW') {
+        body.currentSeason = currentSeason;
+        body.currentEpisode = currentEpisode;
+        body.totalSeasons = totalSeasons;
+        body.episodesInSeason = episodesInSeason;
       }
 
       const response = await fetch(`/api/media/${id}`, {
@@ -224,6 +242,52 @@ export default function MediaDetailPage({ params }: { params: Promise<{ id: stri
                   onChange={(e) => setCompletedAt(e.target.value)}
                   className="w-full h-11 sm:h-12"
                 />
+              </div>
+            )}
+
+            {/* TV Show Progress */}
+            {item.mediaType === 'TV_SHOW' && status === 'IN_PROGRESS' && (
+              <div className="space-y-2 sm:space-y-3">
+                <Label className="text-sm font-semibold">Current Progress</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="current-season" className="text-xs text-muted-foreground">Season</Label>
+                    <Input
+                      id="current-season"
+                      type="number"
+                      min="1"
+                      value={currentSeason}
+                      onChange={(e) => setCurrentSeason(parseInt(e.target.value) || 1)}
+                      className="h-11 sm:h-12"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="current-episode" className="text-xs text-muted-foreground">Episode</Label>
+                    <Input
+                      id="current-episode"
+                      type="number"
+                      min="1"
+                      value={currentEpisode}
+                      onChange={(e) => setCurrentEpisode(parseInt(e.target.value) || 1)}
+                      className="h-11 sm:h-12"
+                    />
+                  </div>
+                </div>
+                {totalSeasons && (
+                  <p className="text-xs text-muted-foreground">
+                    Season {currentSeason} of {totalSeasons} total seasons
+                    {episodesInSeason && ` • Episode ${currentEpisode} of ${episodesInSeason}`}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Show total seasons info even when not watching */}
+            {item.mediaType === 'TV_SHOW' && status !== 'IN_PROGRESS' && totalSeasons && (
+              <div className="space-y-2 sm:space-y-3">
+                <div className="inline-block px-3 py-1.5 bg-muted rounded text-xs font-medium">
+                  {totalSeasons} {totalSeasons === 1 ? 'Season' : 'Seasons'}
+                </div>
               </div>
             )}
           </div>
