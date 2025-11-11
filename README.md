@@ -87,8 +87,14 @@ For detailed instructions on deploying to Vercel with Turso database, see [VERCE
 
 Quick steps:
 1. Create a Turso database
-2. Deploy to Vercel and add environment variables (`DATABASE_URL` and `TURSO_AUTH_TOKEN`)
+2. Deploy to Vercel and add environment variables:
+   - `DATABASE_URL` (your Turso database URL)
+   - `TURSO_AUTH_TOKEN` (your Turso auth token)
+   - `JWT_SECRET` (generate with: `openssl rand -base64 32`)
 3. The database schema will be automatically initialized on first deployment
+4. **Create your admin account**: Visit `https://your-app.vercel.app/setup` to create your first user
+   - This page is only accessible when no users exist in the database
+   - After creating your account, you'll be redirected to the login page
 
 ## Usage
 
@@ -145,10 +151,12 @@ digital_garden/
 │   │   ├── auth/           # Authentication endpoints
 │   │   │   ├── login/      # Login route
 │   │   │   ├── logout/     # Logout route
-│   │   │   └── me/         # Current user session
+│   │   │   ├── me/         # Current user session
+│   │   │   └── setup/      # One-time setup for first user
 │   │   ├── media/          # CRUD operations for media items
 │   │   └── search/         # Search across different APIs
 │   ├── login/              # Login page
+│   ├── setup/              # One-time setup page (production)
 │   ├── media/[id]/         # Detail view for individual items
 │   ├── layout.tsx          # Root layout
 │   ├── page.tsx            # Home page with grid view
@@ -174,17 +182,31 @@ digital_garden/
 
 ## Authentication
 
-This digital garden is designed for **single-user private use**. After creating your account with `npm run create-user`, all routes are protected by authentication middleware.
+This digital garden is designed for **single-user private use**. All routes are protected by authentication middleware.
+
+### Creating Your Account
+
+**For local development:**
+```bash
+npm run create-user
+```
+
+**For production (Vercel, etc.):**
+Visit `/setup` on your deployed app (e.g., `https://your-app.vercel.app/setup`)
+- This page is only accessible when no users exist in the database
+- Once you create your first user, the setup page will automatically redirect to login
+- Perfect for initial deployment setup
 
 ### Security Features
 - Passwords are hashed using bcryptjs
 - Sessions are managed with JWT tokens stored in httpOnly cookies
 - Tokens expire after 7 days
-- All routes except `/login` require authentication
+- All routes except `/login` and `/setup` require authentication
+- Setup page automatically disabled after first user is created
 
 ### Creating Additional Users
 
-To create additional users, use the same command:
+To create additional users locally:
 ```bash
 npm run create-user
 ```
