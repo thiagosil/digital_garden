@@ -8,7 +8,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "create-user": "tsx scripts/create-user.ts"
+    "create-user": "tsx scripts/create-user.ts",
+    "migrate": "tsx scripts/migrate-add-rating.ts"
   },
   "repository": {
     "type": "git",
