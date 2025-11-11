@@ -80,3 +80,47 @@ p {
   outline: 2px solid hsl(var(--color-ring));
   outline-offset: 2px;
 }
+
+/* Safe area insets for notched devices */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .px-safe {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+}
+
+/* Bottom navigation safe area */
+.bottom-nav-safe {
+  padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+}
+
+/* Main content padding to account for bottom nav on mobile */
+@media (max-width: 768px) {
+  .mobile-content {
+    padding-bottom: calc(4rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* Floating Action Button */
+.fab {
+  position: fixed;
+  bottom: calc(6rem + env(safe-area-inset-bottom, 0px));
+  right: 1.25rem;
+  z-index: 40;
+}
+
+@media (min-width: 768px) {
+  .fab {
+    position: static;
+    bottom: auto;
+    right: auto;
+  }
+}

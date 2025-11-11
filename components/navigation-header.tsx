@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
-import { DropIcon, SignOutIcon, ListIcon, XIcon } from '@phosphor-icons/react';
+import { DropIcon, SignOutIcon } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import { useState, useEffect } from 'react';
 
@@ -15,12 +15,10 @@ export function NavigationHeader({}: NavigationHeaderProps) {
   const activeType = searchParams.get('type') || 'BOOK';
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
     setIsAuthenticated(false);
-    setMobileMenuOpen(false);
     try {
       await fetch('/api/auth/logout', { method: 'POST' });
       router.push('/login');
@@ -29,10 +27,6 @@ export function NavigationHeader({}: NavigationHeaderProps) {
       console.error('Logout error:', error);
       setIsLoggingOut(false);
     }
-  };
-
-  const handleNavClick = () => {
-    setMobileMenuOpen(false);
   };
 
   useEffect(() => {
@@ -54,30 +48,15 @@ export function NavigationHeader({}: NavigationHeaderProps) {
   return (
     <>
       <header className="border-b border-border bg-background">
-        <div className="max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-12 py-6">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-8 lg:px-12 py-3 sm:py-6">
           <div className="flex items-center justify-between">
-            {/* Mobile Menu Button & Logo */}
+            {/* Logo */}
             <div className="flex items-center gap-3 sm:gap-4">
-              {isAuthenticated && (
-                <Button
-                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                  variant="ghost"
-                  size="sm"
-                  className="md:hidden shrink-0 text-foreground hover:text-foreground/80 [&_svg]:!size-auto h-11 w-11 p-0"
-                >
-                  {mobileMenuOpen ? (
-                    <XIcon size={24} weight="bold" />
-                  ) : (
-                    <ListIcon size={24} weight="bold" />
-                  )}
-                </Button>
-              )}
-
               <div className="flex items-center">
-                <div className="w-12 h-12 bg-foreground rounded-lg flex items-center justify-center">
-                  <DropIcon size={28} weight="fill" className="text-background" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-foreground rounded-lg flex items-center justify-center">
+                  <DropIcon size={24} weight="fill" className="text-background sm:[&]:w-7 sm:[&]:h-7" />
                 </div>
-                <span className="text-xl font-semibold tracking-tight lowercase">echo</span>
+                <span className="text-lg sm:text-xl font-semibold tracking-tight lowercase">echo</span>
               </div>
             </div>
 
@@ -134,50 +113,6 @@ export function NavigationHeader({}: NavigationHeaderProps) {
           </div>
         </div>
       </header>
-
-      {/* Mobile Menu Overlay */}
-      {mobileMenuOpen && isAuthenticated && (
-        <div className="md:hidden fixed inset-0 z-50 bg-background/95 backdrop-blur-sm">
-          <div className="flex flex-col items-center justify-center h-full gap-8 px-6">
-            <Link
-              href="/?type=BOOK&status=BACKLOG"
-              onClick={handleNavClick}
-              className={`text-2xl font-semibold transition-colors ${
-                activeType === 'BOOK' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              BOOKS
-            </Link>
-            <Link
-              href="/?type=MOVIE&status=BACKLOG"
-              onClick={handleNavClick}
-              className={`text-2xl font-semibold transition-colors ${
-                activeType === 'MOVIE' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              MOVIES
-            </Link>
-            <Link
-              href="/?type=TV_SHOW&status=BACKLOG"
-              onClick={handleNavClick}
-              className={`text-2xl font-semibold transition-colors ${
-                activeType === 'TV_SHOW' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              TV SHOWS
-            </Link>
-            <Link
-              href="/?type=VIDEO_GAME&status=BACKLOG"
-              onClick={handleNavClick}
-              className={`text-2xl font-semibold transition-colors ${
-                activeType === 'VIDEO_GAME' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              GAMES
-            </Link>
-          </div>
-        </div>
-      )}
     </>
   );
 }

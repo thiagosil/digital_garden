@@ -14,6 +14,19 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Echo",
   description: "Reflections on books, movies, shows, and games",
+  manifest: "/manifest.json",
+  themeColor: "#fcfcfc",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Echo",
+  },
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    viewportFit: "cover",
+    userScalable: false,
+  },
 };
 
 export default function RootLayout({

@@ -92,22 +92,22 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-background">
-      <div className="max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-12 py-6 sm:py-16 lg:py-20">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-8 lg:px-12 py-3 sm:py-12 lg:py-20 mobile-content">
         {/* Header */}
-        <div className="mb-8 sm:mb-12 lg:mb-16">
-          <div className="space-y-3 sm:space-y-4">
+        <div className="mb-4 sm:mb-12 lg:mb-16">
+          <div className="space-y-2 sm:space-y-4">
             <div className="flex items-center justify-between gap-4">
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight">{pageContent.title}</h1>
+              <h1 className="text-2xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight">{pageContent.title}</h1>
               <Button
                 onClick={() => setIsAddDialogOpen(true)}
                 variant="ghost"
                 size="sm"
-                className="shrink-0 text-foreground hover:text-foreground/80 [&_svg]:!size-auto h-11 w-11 p-0"
+                className="fab md:shrink-0 md:text-foreground md:hover:text-foreground/80 [&_svg]:!size-auto h-14 w-14 md:h-11 md:w-11 p-0 rounded-full md:rounded-md bg-foreground md:bg-transparent text-background md:text-foreground shadow-lg md:shadow-none hover:shadow-xl md:hover:shadow-none hover:scale-105 md:hover:scale-100 active:scale-95"
               >
-                <PlusIcon size={24} weight="bold" />
+                <PlusIcon size={28} weight="bold" className="md:[&]:w-6 md:[&]:h-6" />
               </Button>
             </div>
-            <p className="text-muted-foreground text-sm sm:text-base lg:text-lg max-w-3xl font-light">
+            <p className="hidden sm:block text-muted-foreground text-sm sm:text-base lg:text-lg max-w-3xl font-light">
               {pageContent.description}
             </p>
           </div>
