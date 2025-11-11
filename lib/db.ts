@@ -1,12 +1,12 @@
-import { createClient, Client } from '@libsql/client/node';
+import { createClient, Client } from '@libsql/client';
 
 let dbClient: Client | null = null;
 let dbInitialized = false;
 
 export function getDb() {
   if (!dbClient) {
-    // Support both local SQLite files and Turso remote databases
-    const url = process.env.DATABASE_URL || 'file:./prisma/dev.db';
+    // Support both local Turso dev server and remote Turso databases
+    const url = process.env.DATABASE_URL || 'http://127.0.0.1:8080';
     const authToken = process.env.TURSO_AUTH_TOKEN;
 
     dbClient = createClient({
