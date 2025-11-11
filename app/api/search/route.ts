@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
 // Google Books API
 async function searchBooks(query: string) {
   const response = await fetch(
-    `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=10`
+    `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=40`
   );
 
   if (!response.ok) {
@@ -57,13 +57,20 @@ async function searchBooks(query: string) {
 
   const data = await response.json();
 
-  return data.items?.map((item: any) => ({
+  const books = data.items?.map((item: any) => ({
     apiId: item.id,
     title: item.volumeInfo.title,
     creator: item.volumeInfo.authors?.join(', ') || 'Unknown Author',
     coverImage: item.volumeInfo.imageLinks?.thumbnail?.replace('http:', 'https:') || null,
     synopsis: item.volumeInfo.description || null,
+    ratingsCount: item.volumeInfo.ratingsCount || 0,
   })) || [];
+
+  // Sort by ratingsCount (descending) and return top 10
+  return books
+    .sort((a, b) => b.ratingsCount - a.ratingsCount)
+    .slice(0, 10)
+    .map(({ ratingsCount, ...book }) => book); // Remove ratingsCount from final result
 }
 
 // TMDB API
@@ -94,7 +101,7 @@ async function searchMovies(query: string) {
 
     const data = await response.json();
 
-    return data.results?.map((item: any) => ({
+    const movies = data.results?.map((item: any) => ({
       apiId: item.id.toString(),
       title: item.title,
       creator: item.release_date ? new Date(item.release_date).getFullYear().toString() : 'Unknown Year',
@@ -102,7 +109,13 @@ async function searchMovies(query: string) {
         ? `https://image.tmdb.org/t/p/w500${item.poster_path}`
         : null,
       synopsis: item.overview || null,
+      popularity: item.popularity || 0,
     })) || [];
+
+    // Sort by popularity (descending)
+    return movies
+      .sort((a, b) => b.popularity - a.popularity)
+      .map(({ popularity, ...movie }) => movie); // Remove popularity from final result
   } catch (error) {
     console.error('Error searching movies:', error);
     throw error;
@@ -136,7 +149,7 @@ async function searchTVShows(query: string) {
 
     const data = await response.json();
 
-    return data.results?.map((item: any) => ({
+    const tvShows = data.results?.map((item: any) => ({
       apiId: item.id.toString(),
       title: item.name,
       creator: item.first_air_date ? new Date(item.first_air_date).getFullYear().toString() : 'Unknown Year',
@@ -144,7 +157,13 @@ async function searchTVShows(query: string) {
         ? `https://image.tmdb.org/t/p/w500${item.poster_path}`
         : null,
       synopsis: item.overview || null,
+      popularity: item.popularity || 0,
     })) || [];
+
+    // Sort by popularity (descending)
+    return tvShows
+      .sort((a, b) => b.popularity - a.popularity)
+      .map(({ popularity, ...show }) => show); // Remove popularity from final result
   } catch (error) {
     console.error('Error searching TV shows:', error);
     throw error;
@@ -162,7 +181,7 @@ async function searchVideoGames(query: string) {
 
   try {
     const response = await fetch(
-      `https://api.rawg.io/api/games?key=${apiKey}&search=${encodeURIComponent(query)}&page_size=10`
+      `https://api.rawg.io/api/games?key=${apiKey}&search=${encodeURIComponent(query)}&page_size=10&ordering=-ratings_count`
     );
 
     if (!response.ok) {
