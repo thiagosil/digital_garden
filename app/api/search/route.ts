@@ -75,25 +75,32 @@ async function searchMovies(query: string) {
     return [];
   }
 
-  const response = await fetch(
-    `https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&query=${encodeURIComponent(query)}`
-  );
+  try {
+    const response = await fetch(
+      `https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&query=${encodeURIComponent(query)}`
+    );
 
-  if (!response.ok) {
-    throw new Error('Failed to fetch movies');
+    if (!response.ok) {
+      const errorBody = await response.text();
+      console.error(`TMDB API error (${response.status}):`, errorBody);
+      throw new Error(`Failed to fetch movies: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+
+    return data.results?.map((item: any) => ({
+      apiId: item.id.toString(),
+      title: item.title,
+      creator: item.release_date ? new Date(item.release_date).getFullYear().toString() : 'Unknown Year',
+      coverImage: item.poster_path
+        ? `https://image.tmdb.org/t/p/w500${item.poster_path}`
+        : null,
+      synopsis: item.overview || null,
+    })) || [];
+  } catch (error) {
+    console.error('Error searching movies:', error);
+    throw error;
   }
-
-  const data = await response.json();
-
-  return data.results?.map((item: any) => ({
-    apiId: item.id.toString(),
-    title: item.title,
-    creator: item.release_date ? new Date(item.release_date).getFullYear().toString() : 'Unknown Year',
-    coverImage: item.poster_path
-      ? `https://image.tmdb.org/t/p/w500${item.poster_path}`
-      : null,
-    synopsis: item.overview || null,
-  })) || [];
 }
 
 async function searchTVShows(query: string) {
@@ -104,25 +111,32 @@ async function searchTVShows(query: string) {
     return [];
   }
 
-  const response = await fetch(
-    `https://api.themoviedb.org/3/search/tv?api_key=${apiKey}&query=${encodeURIComponent(query)}`
-  );
+  try {
+    const response = await fetch(
+      `https://api.themoviedb.org/3/search/tv?api_key=${apiKey}&query=${encodeURIComponent(query)}`
+    );
 
-  if (!response.ok) {
-    throw new Error('Failed to fetch TV shows');
+    if (!response.ok) {
+      const errorBody = await response.text();
+      console.error(`TMDB API error (${response.status}):`, errorBody);
+      throw new Error(`Failed to fetch TV shows: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+
+    return data.results?.map((item: any) => ({
+      apiId: item.id.toString(),
+      title: item.name,
+      creator: item.first_air_date ? new Date(item.first_air_date).getFullYear().toString() : 'Unknown Year',
+      coverImage: item.poster_path
+        ? `https://image.tmdb.org/t/p/w500${item.poster_path}`
+        : null,
+      synopsis: item.overview || null,
+    })) || [];
+  } catch (error) {
+    console.error('Error searching TV shows:', error);
+    throw error;
   }
-
-  const data = await response.json();
-
-  return data.results?.map((item: any) => ({
-    apiId: item.id.toString(),
-    title: item.name,
-    creator: item.first_air_date ? new Date(item.first_air_date).getFullYear().toString() : 'Unknown Year',
-    coverImage: item.poster_path
-      ? `https://image.tmdb.org/t/p/w500${item.poster_path}`
-      : null,
-    synopsis: item.overview || null,
-  })) || [];
 }
 
 // RAWG API
@@ -134,21 +148,28 @@ async function searchVideoGames(query: string) {
     return [];
   }
 
-  const response = await fetch(
-    `https://api.rawg.io/api/games?key=${apiKey}&search=${encodeURIComponent(query)}&page_size=10`
-  );
+  try {
+    const response = await fetch(
+      `https://api.rawg.io/api/games?key=${apiKey}&search=${encodeURIComponent(query)}&page_size=10`
+    );
 
-  if (!response.ok) {
-    throw new Error('Failed to fetch video games');
+    if (!response.ok) {
+      const errorBody = await response.text();
+      console.error(`RAWG API error (${response.status}):`, errorBody);
+      throw new Error(`Failed to fetch video games: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+
+    return data.results?.map((item: any) => ({
+      apiId: item.id.toString(),
+      title: item.name,
+      creator: item.released ? new Date(item.released).getFullYear().toString() : 'Unknown Year',
+      coverImage: item.background_image || null,
+      synopsis: item.description_raw || null,
+    })) || [];
+  } catch (error) {
+    console.error('Error searching video games:', error);
+    throw error;
   }
-
-  const data = await response.json();
-
-  return data.results?.map((item: any) => ({
-    apiId: item.id.toString(),
-    title: item.name,
-    creator: item.released ? new Date(item.released).getFullYear().toString() : 'Unknown Year',
-    coverImage: item.background_image || null,
-    synopsis: item.description_raw || null,
-  })) || [];
 }
