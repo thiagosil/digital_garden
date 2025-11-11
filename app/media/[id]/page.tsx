@@ -10,19 +10,7 @@ import { Input } from '@/components/ui/input';
 import { ArrowLeft, Save, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { StarRating } from '@/components/star-rating';
-
-interface MediaItem {
-  id: string;
-  title: string;
-  mediaType: string;
-  status: string;
-  coverImage: string | null;
-  creator: string | null;
-  synopsis: string | null;
-  notes: string | null;
-  rating: number | null;
-  completedAt: Date | null;
-}
+import { MediaItem } from '@/lib/db';
 
 export default function MediaDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);

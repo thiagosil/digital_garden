@@ -1,17 +1,7 @@
 'use client';
 
 import { MediaCard } from './media-card';
-
-interface MediaItem {
-  id: string;
-  title: string;
-  creator: string | null;
-  coverImage: string | null;
-  status: string;
-  mediaType: string;
-  rating: number | null;
-  completedAt: Date | null;
-}
+import { MediaItem } from '@/lib/db';
 
 interface MediaGridProps {
   items: MediaItem[];

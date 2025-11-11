@@ -15,7 +15,7 @@ interface MediaCardProps {
   status: string;
   mediaType: string;
   rating: number | null;
-  completedAt: Date | null;
+  completedAt: string | null;
   onStatusChange?: () => void;
 }
 
