@@ -1,4 +1,4 @@
-import { createClient, Client } from '@libsql/client';
+import { createClient, Client } from '@libsql/client/node';
 
 let dbClient: Client | null = null;
 let dbInitialized = false;
