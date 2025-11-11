@@ -41,7 +41,7 @@ export async function PATCH(
 
     const { id } = await params;
     const body = await request.json();
-    const { status, notes, rating, completedAt } = body;
+    const { status, notes, rating, completedAt, currentSeason, currentEpisode, totalSeasons, episodesInSeason } = body;
 
     const updateData: any = {};
 
@@ -73,6 +73,22 @@ export async function PATCH(
 
     if (completedAt !== undefined) {
       updateData.completedAt = completedAt;
+    }
+
+    if (currentSeason !== undefined) {
+      updateData.currentSeason = currentSeason;
+    }
+
+    if (currentEpisode !== undefined) {
+      updateData.currentEpisode = currentEpisode;
+    }
+
+    if (totalSeasons !== undefined) {
+      updateData.totalSeasons = totalSeasons;
+    }
+
+    if (episodesInSeason !== undefined) {
+      updateData.episodesInSeason = episodesInSeason;
     }
 
     const item = await mediaQueries.update(id, updateData);

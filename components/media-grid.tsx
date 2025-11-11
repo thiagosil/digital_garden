@@ -32,6 +32,10 @@ export function MediaGrid({ items, onRefresh }: MediaGridProps) {
           mediaType={item.mediaType}
           rating={item.rating}
           completedAt={item.completedAt}
+          currentSeason={item.currentSeason}
+          currentEpisode={item.currentEpisode}
+          totalSeasons={item.totalSeasons}
+          episodesInSeason={item.episodesInSeason}
           onStatusChange={onRefresh}
         />
       ))}

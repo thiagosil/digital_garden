@@ -16,13 +16,19 @@ interface MediaCardProps {
   mediaType: string;
   rating: number | null;
   completedAt: string | null;
+  currentSeason?: number | null;
+  currentEpisode?: number | null;
+  totalSeasons?: number | null;
+  episodesInSeason?: number | null;
   onStatusChange?: () => void;
 }
 
-export function MediaCard({ id, title, creator, coverImage, status, mediaType, rating, completedAt, onStatusChange }: MediaCardProps) {
+export function MediaCard({ id, title, creator, coverImage, status, mediaType, rating, completedAt, currentSeason, currentEpisode, totalSeasons, episodesInSeason, onStatusChange }: MediaCardProps) {
   const [currentStatus, setCurrentStatus] = useState(status);
   const [currentRating, setCurrentRating] = useState(rating);
   const [updating, setUpdating] = useState(false);
+  const [season, setSeason] = useState(currentSeason || 1);
+  const [episode, setEpisode] = useState(currentEpisode || 1);
 
   const handleStatusChange = async (newStatus: string) => {
     if (newStatus === currentStatus) return;
@@ -59,6 +65,30 @@ export function MediaCard({ id, title, creator, coverImage, status, mediaType, r
       }
     } catch (error) {
       console.error('Failed to update rating:', error);
+    }
+  };
+
+  const handleNextEpisode = async () => {
+    setUpdating(true);
+    try {
+      const newEpisode = episode + 1;
+      const response = await fetch(`/api/media/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          currentEpisode: newEpisode,
+          currentSeason: season,
+        }),
+      });
+
+      if (response.ok) {
+        setEpisode(newEpisode);
+        onStatusChange?.();
+      }
+    } catch (error) {
+      console.error('Failed to update episode:', error);
+    } finally {
+      setUpdating(false);
     }
   };
 
@@ -114,6 +144,16 @@ export function MediaCard({ id, title, creator, coverImage, status, mediaType, r
               </p>
             </div>
           )}
+
+          {/* TV Show Progress Badge */}
+          {mediaType === 'TV_SHOW' && currentStatus === 'IN_PROGRESS' && season && episode && (
+            <div className="absolute bottom-0 left-0 right-0 bg-primary/95 backdrop-blur-sm py-1.5 sm:py-2 px-2 sm:px-3">
+              <p className="text-[10px] sm:text-xs font-medium text-primary-foreground text-center">
+                S{season}E{episode}
+                {episodesInSeason && ` of ${episodesInSeason}`}
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Media Info */}
@@ -140,6 +180,27 @@ export function MediaCard({ id, title, creator, coverImage, status, mediaType, r
               onRatingChange={handleRatingChange}
               size="sm"
             />
+          </div>
+        ) : mediaType === 'TV_SHOW' && currentStatus === 'IN_PROGRESS' ? (
+          <div className="flex gap-1">
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1 h-8 text-xs"
+              onClick={handleNextEpisode}
+              disabled={updating}
+            >
+              {updating ? 'Updating...' : 'Next Episode'}
+            </Button>
+            <Link href={`/media/${id}`}>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 text-xs px-2"
+              >
+                Edit
+              </Button>
+            </Link>
           </div>
         ) : (
           <Button
