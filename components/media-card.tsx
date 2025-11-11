@@ -161,9 +161,17 @@ export function MediaCard({ id, title, creator, coverImage, status, mediaType, r
           <h3 className="font-semibold text-xs sm:text-sm leading-snug line-clamp-2 group-hover:text-muted-foreground transition-colors">
             {title}
           </h3>
-          <p className="text-[10px] sm:text-xs text-muted-foreground font-light line-clamp-1">
-            {creator}
-          </p>
+          {mediaType === 'TV_SHOW' && currentStatus === 'IN_PROGRESS' && season && episode ? (
+            <p className="text-[10px] sm:text-xs text-primary font-medium line-clamp-1">
+              S{season}E{episode}
+              {episodesInSeason && ` of ${episodesInSeason}`}
+              {totalSeasons && ` • Season ${season}/${totalSeasons}`}
+            </p>
+          ) : (
+            <p className="text-[10px] sm:text-xs text-muted-foreground font-light line-clamp-1">
+              {creator}
+            </p>
+          )}
         </div>
         </div>
       </Link>
