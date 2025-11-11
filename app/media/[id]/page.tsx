@@ -219,13 +219,16 @@ export default function MediaDetailPage({ params }: { params: Promise<{ id: stri
     <main className="min-h-screen bg-background">
       <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-12 py-8 sm:py-12 lg:py-16">
         {/* Back Button */}
-        <Link href="/" className="inline-block mb-6 sm:mb-8 lg:mb-12">
-          <Button variant="ghost" size="sm" className="font-medium h-10 sm:h-11">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            <span className="hidden sm:inline">Back to Library</span>
-            <span className="sm:hidden">Back</span>
-          </Button>
-        </Link>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="font-medium h-10 sm:h-11 mb-6 sm:mb-8 lg:mb-12"
+          onClick={() => router.back()}
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          <span className="hidden sm:inline">Back</span>
+          <span className="sm:hidden">Back</span>
+        </Button>
 
         <div className="grid md:grid-cols-[280px_1fr] lg:grid-cols-[320px_1fr] gap-6 sm:gap-8 lg:gap-12">
           {/* Cover Image */}
