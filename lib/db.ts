@@ -1,21 +1,24 @@
 import { createClient, Client } from '@libsql/client';
 
-let db: Client | null = null;
+let dbClient: Client | null = null;
 let dbInitialized = false;
 
 export function getDb() {
-  if (!db) {
+  if (!dbClient) {
     // Support both local SQLite files and Turso remote databases
     const url = process.env.DATABASE_URL || 'file:./prisma/dev.db';
     const authToken = process.env.TURSO_AUTH_TOKEN;
 
-    db = createClient({
+    dbClient = createClient({
       url,
       authToken,
     });
   }
-  return db;
+  return dbClient;
 }
+
+// Export db for direct use in other files
+export const db = getDb();
 
 // Initialize database schema if it doesn't exist
 export async function initializeDb() {
@@ -24,40 +27,46 @@ export async function initializeDb() {
   const db = getDb();
 
   try {
-    // Check if MediaItem table exists by trying to query it
-    await db.execute({ sql: 'SELECT 1 FROM MediaItem LIMIT 1', args: [] });
+    // Create User table if it doesn't exist
+    await db.execute({
+      sql: `
+        CREATE TABLE IF NOT EXISTS User (
+          id TEXT PRIMARY KEY NOT NULL,
+          email TEXT NOT NULL UNIQUE,
+          password TEXT NOT NULL,
+          createdAt TEXT NOT NULL,
+          updatedAt TEXT NOT NULL
+        )
+      `,
+      args: []
+    });
+
+    // Create MediaItem table if it doesn't exist
+    await db.execute({
+      sql: `
+        CREATE TABLE IF NOT EXISTS MediaItem (
+          id TEXT PRIMARY KEY NOT NULL,
+          title TEXT NOT NULL,
+          mediaType TEXT NOT NULL,
+          status TEXT NOT NULL DEFAULT 'BACKLOG',
+          coverImage TEXT,
+          creator TEXT,
+          synopsis TEXT,
+          notes TEXT,
+          completedAt TEXT,
+          createdAt TEXT NOT NULL,
+          updatedAt TEXT NOT NULL,
+          apiId TEXT
+        )
+      `,
+      args: []
+    });
+
     dbInitialized = true;
+    console.log('Database tables initialized successfully');
   } catch (error) {
-    // Table doesn't exist, create it
-    console.log('MediaItem table not found, creating...');
-
-    try {
-      await db.execute({
-        sql: `
-          CREATE TABLE IF NOT EXISTS MediaItem (
-            id TEXT PRIMARY KEY NOT NULL,
-            title TEXT NOT NULL,
-            mediaType TEXT NOT NULL,
-            status TEXT NOT NULL DEFAULT 'BACKLOG',
-            coverImage TEXT,
-            creator TEXT,
-            synopsis TEXT,
-            notes TEXT,
-            completedAt TEXT,
-            createdAt TEXT NOT NULL,
-            updatedAt TEXT NOT NULL,
-            apiId TEXT
-          )
-        `,
-        args: []
-      });
-
-      dbInitialized = true;
-      console.log('MediaItem table created successfully');
-    } catch (createError) {
-      console.error('Failed to create MediaItem table:', createError);
-      throw createError;
-    }
+    console.error('Failed to initialize database:', error);
+    throw error;
   }
 }
 
