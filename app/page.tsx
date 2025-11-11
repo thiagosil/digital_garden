@@ -92,13 +92,10 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-background">
-      <div className="max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-12 py-12 sm:py-16 lg:py-20">
+      <div className="max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-12 py-6 sm:py-16 lg:py-20">
         {/* Header */}
         <div className="mb-8 sm:mb-12 lg:mb-16">
           <div className="space-y-3 sm:space-y-4">
-            <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              LIBRARY
-            </p>
             <div className="flex items-center justify-between gap-4">
               <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight">{pageContent.title}</h1>
               <Button
