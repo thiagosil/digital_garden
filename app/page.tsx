@@ -22,7 +22,7 @@ export default function Home() {
   const searchParams = useSearchParams();
   const [items, setItems] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState<string | null>('COMPLETED');
+  const [statusFilter, setStatusFilter] = useState<string | null>(searchParams.get('status') || 'BACKLOG');
   const [typeFilter, setTypeFilter] = useState<string | null>(searchParams.get('type') || 'BOOK');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 

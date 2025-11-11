@@ -84,7 +84,7 @@ export function NavigationHeader({}: NavigationHeaderProps) {
             {/* Desktop Navigation Links */}
             <nav className="hidden md:flex items-center gap-8">
               <Link
-                href="/?type=BOOK"
+                href="/?type=BOOK&status=BACKLOG"
                 className={`text-sm font-medium transition-colors ${
                   activeType === 'BOOK' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
                 }`}
@@ -92,7 +92,7 @@ export function NavigationHeader({}: NavigationHeaderProps) {
                 BOOKS
               </Link>
               <Link
-                href="/?type=MOVIE"
+                href="/?type=MOVIE&status=BACKLOG"
                 className={`text-sm font-medium transition-colors ${
                   activeType === 'MOVIE' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
                 }`}
@@ -100,7 +100,7 @@ export function NavigationHeader({}: NavigationHeaderProps) {
                 MOVIES
               </Link>
               <Link
-                href="/?type=TV_SHOW"
+                href="/?type=TV_SHOW&status=BACKLOG"
                 className={`text-sm font-medium transition-colors ${
                   activeType === 'TV_SHOW' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
                 }`}
@@ -108,7 +108,7 @@ export function NavigationHeader({}: NavigationHeaderProps) {
                 TV SHOWS
               </Link>
               <Link
-                href="/?type=VIDEO_GAME"
+                href="/?type=VIDEO_GAME&status=BACKLOG"
                 className={`text-sm font-medium transition-colors ${
                   activeType === 'VIDEO_GAME' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
                 }`}
@@ -140,7 +140,7 @@ export function NavigationHeader({}: NavigationHeaderProps) {
         <div className="md:hidden fixed inset-0 z-50 bg-background/95 backdrop-blur-sm">
           <div className="flex flex-col items-center justify-center h-full gap-8 px-6">
             <Link
-              href="/?type=BOOK"
+              href="/?type=BOOK&status=BACKLOG"
               onClick={handleNavClick}
               className={`text-2xl font-semibold transition-colors ${
                 activeType === 'BOOK' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
@@ -149,7 +149,7 @@ export function NavigationHeader({}: NavigationHeaderProps) {
               BOOKS
             </Link>
             <Link
-              href="/?type=MOVIE"
+              href="/?type=MOVIE&status=BACKLOG"
               onClick={handleNavClick}
               className={`text-2xl font-semibold transition-colors ${
                 activeType === 'MOVIE' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
@@ -158,7 +158,7 @@ export function NavigationHeader({}: NavigationHeaderProps) {
               MOVIES
             </Link>
             <Link
-              href="/?type=TV_SHOW"
+              href="/?type=TV_SHOW&status=BACKLOG"
               onClick={handleNavClick}
               className={`text-2xl font-semibold transition-colors ${
                 activeType === 'TV_SHOW' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
@@ -167,7 +167,7 @@ export function NavigationHeader({}: NavigationHeaderProps) {
               TV SHOWS
             </Link>
             <Link
-              href="/?type=VIDEO_GAME"
+              href="/?type=VIDEO_GAME&status=BACKLOG"
               onClick={handleNavClick}
               className={`text-2xl font-semibold transition-colors ${
                 activeType === 'VIDEO_GAME' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
