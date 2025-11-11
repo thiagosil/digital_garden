@@ -52,23 +52,23 @@ export function BookshelfTabs({ activeTab, onTabChange, mediaType }: BookshelfTa
 
   return (
     <div className="mb-16 border-b border-border">
-      <nav className="flex gap-8 -mb-px">
+      <nav className="flex gap-2 -mb-px">
         {tabs.map((tab) => (
           <button
             key={tab.value}
             onClick={() => onTabChange(tab.value)}
             className={`
-              py-4 px-1 text-sm font-medium tracking-wide transition-colors relative
+              py-4 px-6 text-sm tracking-wide transition-all relative rounded-t-lg
               ${
                 activeTab === tab.value
-                  ? 'text-foreground'
-                  : 'text-muted-foreground hover:text-foreground'
+                  ? 'text-foreground font-semibold bg-accent-rust/10'
+                  : 'text-muted-foreground font-medium hover:text-foreground hover:bg-accent/50'
               }
             `}
           >
             {tab.label}
             {activeTab === tab.value && (
-              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent-rust" />
+              <span className="absolute bottom-0 left-0 right-0 h-[3px] bg-accent-rust rounded-t-sm" />
             )}
           </button>
         ))}
