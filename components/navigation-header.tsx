@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { useState, useEffect } from 'react';
 
 interface NavigationHeaderProps {
-  onAddMedia?: () => void;
+  onAddMedia?: (mediaType: string) => void;
 }
 
 export function NavigationHeader({ onAddMedia }: NavigationHeaderProps) {
@@ -124,7 +124,7 @@ export function NavigationHeader({ onAddMedia }: NavigationHeaderProps) {
               {isAuthenticated && (
                 <>
                   <Button
-                    onClick={onAddMedia}
+                    onClick={() => onAddMedia?.(activeType)}
                     variant="ghost"
                     size="sm"
                     className="shrink-0 text-foreground hover:text-foreground/80 [&_svg]:!size-auto h-11 w-11 p-0"

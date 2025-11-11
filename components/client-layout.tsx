@@ -10,6 +10,7 @@ interface ClientLayoutProps {
 
 export function ClientLayout({ children }: ClientLayoutProps) {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [selectedMediaType, setSelectedMediaType] = useState<string>('');
 
   const handleItemAdded = () => {
     setIsAddDialogOpen(false);
@@ -17,14 +18,20 @@ export function ClientLayout({ children }: ClientLayoutProps) {
     window.location.reload();
   };
 
+  const handleAddMedia = (mediaType: string) => {
+    setSelectedMediaType(mediaType);
+    setIsAddDialogOpen(true);
+  };
+
   return (
     <>
-      <NavigationHeader onAddMedia={() => setIsAddDialogOpen(true)} />
+      <NavigationHeader onAddMedia={handleAddMedia} />
       {children}
       <AddMediaDialog
         open={isAddDialogOpen}
         onOpenChange={setIsAddDialogOpen}
         onItemAdded={handleItemAdded}
+        defaultMediaType={selectedMediaType}
       />
     </>
   );

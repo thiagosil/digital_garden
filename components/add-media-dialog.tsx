@@ -33,15 +33,23 @@ interface AddMediaDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onItemAdded: () => void;
+  defaultMediaType?: string;
 }
 
-export function AddMediaDialog({ open, onOpenChange, onItemAdded }: AddMediaDialogProps) {
+export function AddMediaDialog({ open, onOpenChange, onItemAdded, defaultMediaType }: AddMediaDialogProps) {
   const [mediaType, setMediaType] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [searching, setSearching] = useState(false);
   const [adding, setAdding] = useState(false);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Pre-populate media type when dialog opens
+  useEffect(() => {
+    if (open && defaultMediaType) {
+      setMediaType(defaultMediaType);
+    }
+  }, [open, defaultMediaType]);
 
   const handleSearch = useCallback(async () => {
     if (!mediaType || !searchQuery.trim()) {
