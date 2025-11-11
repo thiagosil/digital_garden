@@ -1,6 +1,11 @@
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { useState } from 'react';
+import { StarRating } from './star-rating';
 
 interface MediaCardProps {
   id: string;
@@ -8,13 +13,82 @@ interface MediaCardProps {
   creator: string;
   coverImage: string | null;
   status: string;
+  mediaType: string;
+  rating: number | null;
   completedAt: Date | null;
+  onStatusChange?: () => void;
 }
 
-export function MediaCard({ id, title, creator, coverImage, status, completedAt }: MediaCardProps) {
+export function MediaCard({ id, title, creator, coverImage, status, mediaType, rating, completedAt, onStatusChange }: MediaCardProps) {
+  const [currentStatus, setCurrentStatus] = useState(status);
+  const [currentRating, setCurrentRating] = useState(rating);
+  const [updating, setUpdating] = useState(false);
+
+  const handleStatusChange = async (newStatus: string) => {
+    if (newStatus === currentStatus) return;
+
+    setUpdating(true);
+    try {
+      const response = await fetch(`/api/media/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (response.ok) {
+        setCurrentStatus(newStatus);
+        onStatusChange?.();
+      }
+    } catch (error) {
+      console.error('Failed to update status:', error);
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const handleRatingChange = async (newRating: number) => {
+    try {
+      const response = await fetch(`/api/media/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rating: newRating || null }),
+      });
+
+      if (response.ok) {
+        setCurrentRating(newRating);
+      }
+    } catch (error) {
+      console.error('Failed to update rating:', error);
+    }
+  };
+
+  const getActionButton = () => {
+    const buttonConfig: Record<string, Record<string, { label: string; nextStatus: string }>> = {
+      BOOK: {
+        BACKLOG: { label: 'Start Reading', nextStatus: 'IN_PROGRESS' },
+        IN_PROGRESS: { label: 'Mark as Read', nextStatus: 'COMPLETED' },
+      },
+      MOVIE: {
+        BACKLOG: { label: 'Start Watching', nextStatus: 'IN_PROGRESS' },
+        IN_PROGRESS: { label: 'Mark as Watched', nextStatus: 'COMPLETED' },
+      },
+      TV_SHOW: {
+        BACKLOG: { label: 'Start Watching', nextStatus: 'IN_PROGRESS' },
+        IN_PROGRESS: { label: 'Mark as Watched', nextStatus: 'COMPLETED' },
+      },
+      VIDEO_GAME: {
+        BACKLOG: { label: 'Start Playing', nextStatus: 'IN_PROGRESS' },
+        IN_PROGRESS: { label: 'Mark as Played', nextStatus: 'COMPLETED' },
+      },
+    };
+
+    return buttonConfig[mediaType]?.[currentStatus];
+  };
+
   return (
-    <Link href={`/media/${id}`} className="group block">
-      <div className="space-y-2 sm:space-y-3">
+    <div className="group relative">
+      <Link href={`/media/${id}`} className="block">
+        <div className="space-y-2 sm:space-y-3">
         {/* Cover Image */}
         <div className="relative aspect-[2/3] bg-muted overflow-hidden rounded-md shadow-sm transition-all duration-300 group-hover:shadow-lg active:scale-[0.98]">
           {coverImage ? (
@@ -33,7 +107,7 @@ export function MediaCard({ id, title, creator, coverImage, status, completedAt 
           )}
 
           {/* Finished Badge */}
-          {status === 'COMPLETED' && completedAt && (
+          {currentStatus === 'COMPLETED' && completedAt && (
             <div className="absolute bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm py-1.5 sm:py-2 px-2 sm:px-3">
               <p className="text-[10px] sm:text-xs font-medium text-foreground text-center">
                 Finished {new Date(completedAt).getFullYear()}
@@ -51,7 +125,37 @@ export function MediaCard({ id, title, creator, coverImage, status, completedAt 
             {creator}
           </p>
         </div>
+        </div>
+      </Link>
+
+      {/* Action Button or Rating */}
+      <div
+        className="mt-2"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {currentStatus === 'COMPLETED' ? (
+          <div className="flex items-center justify-center py-1">
+            <StarRating
+              rating={currentRating}
+              onRatingChange={handleRatingChange}
+              size="sm"
+            />
+          </div>
+        ) : (
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full h-8 text-xs"
+            onClick={() => {
+              const action = getActionButton();
+              if (action) handleStatusChange(action.nextStatus);
+            }}
+            disabled={updating}
+          >
+            {updating ? 'Updating...' : getActionButton()?.label}
+          </Button>
+        )}
       </div>
-    </Link>
+    </div>
   );
 }

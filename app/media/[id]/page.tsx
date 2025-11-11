@@ -4,18 +4,12 @@ import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { ArrowLeft, Save, Trash2 } from 'lucide-react';
 import Link from 'next/link';
+import { StarRating } from '@/components/star-rating';
 
 interface MediaItem {
   id: string;
@@ -26,6 +20,7 @@ interface MediaItem {
   creator: string | null;
   synopsis: string | null;
   notes: string | null;
+  rating: number | null;
   completedAt: Date | null;
 }
 
@@ -37,6 +32,7 @@ export default function MediaDetailPage({ params }: { params: Promise<{ id: stri
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState('');
   const [notes, setNotes] = useState('');
+  const [rating, setRating] = useState<number | null>(null);
   const [completedAt, setCompletedAt] = useState('');
 
   useEffect(() => {
@@ -50,6 +46,7 @@ export default function MediaDetailPage({ params }: { params: Promise<{ id: stri
       setItem(data.item);
       setStatus(data.item.status);
       setNotes(data.item.notes || '');
+      setRating(data.item.rating || null);
 
       // Format completedAt for input[type="date"]
       if (data.item.completedAt) {
@@ -68,7 +65,7 @@ export default function MediaDetailPage({ params }: { params: Promise<{ id: stri
   const handleSave = async () => {
     setSaving(true);
     try {
-      const body: any = { status, notes };
+      const body: any = { status, notes, rating };
 
       // Include completedAt only if it's set and status is COMPLETED
       if (status === 'COMPLETED' && completedAt) {
@@ -172,18 +169,61 @@ export default function MediaDetailPage({ params }: { params: Promise<{ id: stri
 
             {/* Status Selector */}
             <div className="space-y-2 sm:space-y-3">
-              <Label htmlFor="status" className="text-sm font-semibold">Status</Label>
-              <Select value={status} onValueChange={setStatus}>
-                <SelectTrigger id="status" className="h-11 sm:h-12">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="BACKLOG">Backlog</SelectItem>
-                  <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
-                  <SelectItem value="COMPLETED">Completed</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label className="text-sm font-semibold">Status</Label>
+              <div className="grid grid-cols-3 gap-2">
+                <Button
+                  type="button"
+                  variant={status === 'BACKLOG' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setStatus('BACKLOG')}
+                  className="h-9 sm:h-10 text-xs sm:text-sm"
+                >
+                  {item.mediaType === 'BOOK' ? 'Want to Read' :
+                   item.mediaType === 'MOVIE' ? 'Want to Watch' :
+                   item.mediaType === 'TV_SHOW' ? 'Want to Watch' :
+                   item.mediaType === 'VIDEO_GAME' ? 'Want to Play' :
+                   'Backlog'}
+                </Button>
+                <Button
+                  type="button"
+                  variant={status === 'IN_PROGRESS' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setStatus('IN_PROGRESS')}
+                  className="h-9 sm:h-10 text-xs sm:text-sm"
+                >
+                  {item.mediaType === 'BOOK' ? 'Reading' :
+                   item.mediaType === 'MOVIE' ? 'Watching' :
+                   item.mediaType === 'TV_SHOW' ? 'Watching' :
+                   item.mediaType === 'VIDEO_GAME' ? 'Playing' :
+                   'In Progress'}
+                </Button>
+                <Button
+                  type="button"
+                  variant={status === 'COMPLETED' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setStatus('COMPLETED')}
+                  className="h-9 sm:h-10 text-xs sm:text-sm"
+                >
+                  {item.mediaType === 'BOOK' ? 'Read' :
+                   item.mediaType === 'MOVIE' ? 'Watched' :
+                   item.mediaType === 'TV_SHOW' ? 'Watched' :
+                   item.mediaType === 'VIDEO_GAME' ? 'Played' :
+                   'Completed'}
+                </Button>
+              </div>
             </div>
+
+            {/* Rating - Only show when completed */}
+            {status === 'COMPLETED' && (
+              <div className="space-y-2 sm:space-y-3">
+                <Label className="text-sm font-semibold">Rating</Label>
+                <StarRating
+                  rating={rating}
+                  onRatingChange={setRating}
+                  size="md"
+                />
+              </div>
+            )}
 
             {/* Completion Date */}
             {status === 'COMPLETED' && (

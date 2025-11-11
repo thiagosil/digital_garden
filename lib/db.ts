@@ -53,6 +53,7 @@ export async function initializeDb() {
           creator TEXT,
           synopsis TEXT,
           notes TEXT,
+          rating INTEGER,
           completedAt TEXT,
           createdAt TEXT NOT NULL,
           updatedAt TEXT NOT NULL,
@@ -79,6 +80,7 @@ export interface MediaItem {
   creator: string | null;
   synopsis: string | null;
   notes: string | null;
+  rating: number | null;
   completedAt: string | null;
   createdAt: string;
   updatedAt: string;
@@ -120,6 +122,8 @@ export const mediaQueries = {
   create: async (data: {
     title: string;
     mediaType: string;
+    status?: string;
+    rating?: number | null;
     coverImage?: string;
     creator?: string;
     synopsis?: string;
@@ -131,14 +135,15 @@ export const mediaQueries = {
 
     await db.execute({
       sql: `
-        INSERT INTO MediaItem (id, title, mediaType, status, coverImage, creator, synopsis, apiId, createdAt, updatedAt)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO MediaItem (id, title, mediaType, status, rating, coverImage, creator, synopsis, apiId, createdAt, updatedAt)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `,
       args: [
         id,
         data.title,
         data.mediaType,
-        'BACKLOG',
+        data.status || 'BACKLOG',
+        data.rating || null,
         data.coverImage || null,
         data.creator || null,
         data.synopsis || null,
@@ -154,6 +159,7 @@ export const mediaQueries = {
   update: async (id: string, data: {
     status?: string;
     notes?: string;
+    rating?: number | null;
     completedAt?: string | null;
   }): Promise<MediaItem> => {
     const db = getDb();
@@ -179,6 +185,11 @@ export const mediaQueries = {
     if (data.notes !== undefined) {
       updates.push('notes = ?');
       params.push(data.notes);
+    }
+
+    if (data.rating !== undefined) {
+      updates.push('rating = ?');
+      params.push(data.rating);
     }
 
     if (data.completedAt !== undefined) {

@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Search } from 'lucide-react';
 import Image from 'next/image';
+import { StarRating } from './star-rating';
 
 interface SearchResult {
   apiId: string;
@@ -38,6 +39,8 @@ interface AddMediaDialogProps {
 
 export function AddMediaDialog({ open, onOpenChange, onItemAdded, defaultMediaType }: AddMediaDialogProps) {
   const [mediaType, setMediaType] = useState<string>('');
+  const [status, setStatus] = useState<string>('BACKLOG');
+  const [rating, setRating] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [searching, setSearching] = useState(false);
@@ -73,23 +76,33 @@ export function AddMediaDialog({ open, onOpenChange, onItemAdded, defaultMediaTy
   const handleAddItem = async (result: SearchResult) => {
     setAdding(true);
     try {
+      const body: any = {
+        title: result.title,
+        mediaType,
+        status,
+        coverImage: result.coverImage,
+        creator: result.creator,
+        synopsis: result.synopsis,
+        apiId: result.apiId,
+      };
+
+      // Only include rating if status is COMPLETED and rating is set
+      if (status === 'COMPLETED' && rating) {
+        body.rating = rating;
+      }
+
       const response = await fetch('/api/media', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: result.title,
-          mediaType,
-          coverImage: result.coverImage,
-          creator: result.creator,
-          synopsis: result.synopsis,
-          apiId: result.apiId,
-        }),
+        body: JSON.stringify(body),
       });
 
       if (response.ok) {
         onItemAdded();
         // Reset state
         setMediaType('');
+        setStatus('BACKLOG');
+        setRating(null);
         setSearchQuery('');
         setSearchResults([]);
       }
@@ -171,6 +184,72 @@ export function AddMediaDialog({ open, onOpenChange, onItemAdded, defaultMediaTy
               </Select>
             </div>
           )}
+
+          {/* Status Selection */}
+          <div className="space-y-1.5 sm:space-y-3">
+            <Label className="text-xs sm:text-sm font-semibold">Add as</Label>
+            <div className="grid grid-cols-3 gap-2">
+              <Button
+                type="button"
+                variant={status === 'BACKLOG' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => {
+                  setStatus('BACKLOG');
+                  setRating(null);
+                }}
+                className="h-10 sm:h-12 text-xs sm:text-sm"
+              >
+                {(mediaType || defaultMediaType) === 'BOOK' ? 'Want to Read' :
+                 (mediaType || defaultMediaType) === 'MOVIE' ? 'Want to Watch' :
+                 (mediaType || defaultMediaType) === 'TV_SHOW' ? 'Want to Watch' :
+                 (mediaType || defaultMediaType) === 'VIDEO_GAME' ? 'Want to Play' :
+                 'Want to'}
+              </Button>
+              <Button
+                type="button"
+                variant={status === 'IN_PROGRESS' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => {
+                  setStatus('IN_PROGRESS');
+                  setRating(null);
+                }}
+                className="h-10 sm:h-12 text-xs sm:text-sm"
+              >
+                {(mediaType || defaultMediaType) === 'BOOK' ? 'Reading' :
+                 (mediaType || defaultMediaType) === 'MOVIE' ? 'Watching' :
+                 (mediaType || defaultMediaType) === 'TV_SHOW' ? 'Watching' :
+                 (mediaType || defaultMediaType) === 'VIDEO_GAME' ? 'Playing' :
+                 'In Progress'}
+              </Button>
+              <Button
+                type="button"
+                variant={status === 'COMPLETED' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setStatus('COMPLETED')}
+                className="h-10 sm:h-12 text-xs sm:text-sm"
+              >
+                {(mediaType || defaultMediaType) === 'BOOK' ? 'Read' :
+                 (mediaType || defaultMediaType) === 'MOVIE' ? 'Watched' :
+                 (mediaType || defaultMediaType) === 'TV_SHOW' ? 'Watched' :
+                 (mediaType || defaultMediaType) === 'VIDEO_GAME' ? 'Played' :
+                 'Completed'}
+              </Button>
+            </div>
+
+            {/* Rating - Only show when COMPLETED */}
+            {status === 'COMPLETED' && (
+              <div className="pt-2">
+                <Label className="text-xs sm:text-sm font-semibold mb-2 block">Rating (optional)</Label>
+                <div className="flex justify-center">
+                  <StarRating
+                    rating={rating}
+                    onRatingChange={setRating}
+                    size="md"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* Search Input */}
           <div className="flex gap-2">

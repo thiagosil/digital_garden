@@ -8,14 +8,17 @@ interface MediaItem {
   creator: string | null;
   coverImage: string | null;
   status: string;
+  mediaType: string;
+  rating: number | null;
   completedAt: Date | null;
 }
 
 interface MediaGridProps {
   items: MediaItem[];
+  onRefresh?: () => void;
 }
 
-export function MediaGrid({ items }: MediaGridProps) {
+export function MediaGrid({ items, onRefresh }: MediaGridProps) {
   if (items.length === 0) {
     return (
       <div className="text-center py-20">
@@ -36,7 +39,10 @@ export function MediaGrid({ items }: MediaGridProps) {
           creator={item.creator || 'Unknown'}
           coverImage={item.coverImage}
           status={item.status}
+          mediaType={item.mediaType}
+          rating={item.rating}
           completedAt={item.completedAt}
+          onStatusChange={onRefresh}
         />
       ))}
     </div>
