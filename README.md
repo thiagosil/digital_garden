@@ -30,6 +30,7 @@ A private digital garden for tracking books, movies, TV shows, and video games. 
 
 - Node.js 18+
 - npm or yarn
+- [Turso CLI](https://docs.turso.tech/cli/installation) (for local development)
 
 ### Installation
 
@@ -47,37 +48,46 @@ npm install
 3. Set up environment variables:
 Create a `.env` file in the root directory:
 ```env
-DATABASE_URL="file:./prisma/dev.db"
+# For local development
+DATABASE_URL="http://127.0.0.1:8080"
 
 # Authentication (required)
 JWT_SECRET="your-secret-key-change-this-in-production"
 # Generate a secure secret: openssl rand -base64 32
 
 # API Keys (optional but recommended)
-TMDB_API_KEY="your_tmdb_api_key"
+TMDB_ACCESS_TOKEN="your_tmdb_access_token"
 RAWG_API_KEY="your_rawg_api_key"
 # Google Books API doesn't require a key for basic usage
 ```
 
 To get API keys:
-- TMDB: https://www.themoviedb.org/settings/api
+- TMDB: https://www.themoviedb.org/settings/api (use the Read Access Token)
 - RAWG: https://rawg.io/apidocs
 
-4. Create your admin user:
+4. Start the local Turso database server:
+```bash
+turso dev
+```
+
+This starts a local SQLite database server at `http://127.0.0.1:8080`.
+Leave this running in a separate terminal.
+
+5. Create your admin user:
 ```bash
 npm run create-user
 ```
 
 You'll be prompted to enter your email and password. This is the account you'll use to log in.
 
-5. Run the development server:
+6. Run the development server (in a new terminal):
 ```bash
 npm run dev
 ```
 
-6. Open [http://localhost:3000](http://localhost:3000) in your browser
+7. Open [http://localhost:3000](http://localhost:3000) in your browser
 
-You'll be redirected to the login page. Use the credentials you created in step 4.
+You'll be redirected to the login page. Use the credentials you created in step 5.
 
 ## Deployment
 
