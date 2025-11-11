@@ -63,6 +63,16 @@ export function AddMediaDialog({ open, onOpenChange, onItemAdded, defaultMediaTy
   const [tvShowDetails, setTvShowDetails] = useState<TVShowDetails | null>(null);
   const [fetchingDetails, setFetchingDetails] = useState(false);
 
+  // Get max episodes for current season
+  const maxEpisodesInCurrentSeason = tvShowDetails?.seasons.find(s => s.seasonNumber === currentSeason)?.episodeCount || null;
+
+  // Reset episode to 1 when season changes or validate against max
+  useEffect(() => {
+    if (maxEpisodesInCurrentSeason && currentEpisode > maxEpisodesInCurrentSeason) {
+      setCurrentEpisode(1);
+    }
+  }, [currentSeason, maxEpisodesInCurrentSeason]);
+
   // Pre-populate media type when dialog opens
   useEffect(() => {
     if (open && defaultMediaType) {
@@ -338,8 +348,13 @@ export function AddMediaDialog({ open, onOpenChange, onItemAdded, defaultMediaTy
                       id="current-season"
                       type="number"
                       min="1"
+                      max={tvShowDetails?.totalSeasons || undefined}
                       value={currentSeason}
-                      onChange={(e) => setCurrentSeason(parseInt(e.target.value) || 1)}
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value) || 1;
+                        const max = tvShowDetails?.totalSeasons || 999;
+                        setCurrentSeason(Math.min(Math.max(1, value), max));
+                      }}
                       className="h-10"
                     />
                   </div>
@@ -349,13 +364,25 @@ export function AddMediaDialog({ open, onOpenChange, onItemAdded, defaultMediaTy
                       id="current-episode"
                       type="number"
                       min="1"
+                      max={maxEpisodesInCurrentSeason || undefined}
                       value={currentEpisode}
-                      onChange={(e) => setCurrentEpisode(parseInt(e.target.value) || 1)}
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value) || 1;
+                        const max = maxEpisodesInCurrentSeason || 999;
+                        setCurrentEpisode(Math.min(Math.max(1, value), max));
+                      }}
                       className="h-10"
                     />
                   </div>
                 </div>
-                <p className="text-xs text-muted-foreground">You can update this later</p>
+                {maxEpisodesInCurrentSeason ? (
+                  <p className="text-xs text-muted-foreground">
+                    Season {currentSeason} has {maxEpisodesInCurrentSeason} episodes
+                    {tvShowDetails?.totalSeasons && ` • ${tvShowDetails.totalSeasons} total seasons`}
+                  </p>
+                ) : (
+                  <p className="text-xs text-muted-foreground">You can update this later</p>
+                )}
               </div>
             )}
           </div>

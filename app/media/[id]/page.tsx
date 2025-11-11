@@ -26,6 +26,22 @@ export default function MediaDetailPage({ params }: { params: Promise<{ id: stri
   const [currentEpisode, setCurrentEpisode] = useState<number>(1);
   const [totalSeasons, setTotalSeasons] = useState<number | null>(null);
   const [episodesInSeason, setEpisodesInSeason] = useState<number | null>(null);
+  const [tvShowSeasons, setTvShowSeasons] = useState<Array<{ seasonNumber: number; episodeCount: number }>>([]);
+
+  // Get max episodes for current season
+  const maxEpisodesInCurrentSeason = tvShowSeasons.find(s => s.seasonNumber === currentSeason)?.episodeCount || episodesInSeason;
+
+  // Update episode count when season changes
+  useEffect(() => {
+    const seasonData = tvShowSeasons.find(s => s.seasonNumber === currentSeason);
+    if (seasonData) {
+      setEpisodesInSeason(seasonData.episodeCount);
+      // Reset episode to 1 if current episode exceeds the max for new season
+      if (currentEpisode > seasonData.episodeCount) {
+        setCurrentEpisode(1);
+      }
+    }
+  }, [currentSeason, tvShowSeasons]);
 
   useEffect(() => {
     fetchItem();
@@ -45,6 +61,26 @@ export default function MediaDetailPage({ params }: { params: Promise<{ id: stri
       setCurrentEpisode(data.item.currentEpisode || 1);
       setTotalSeasons(data.item.totalSeasons || null);
       setEpisodesInSeason(data.item.episodesInSeason || null);
+
+      // Fetch TV show details if it's a TV show with an API ID
+      if (data.item.mediaType === 'TV_SHOW' && data.item.apiId) {
+        try {
+          const tvResponse = await fetch(`/api/tv-show-details?tmdbId=${data.item.apiId}`);
+          if (tvResponse.ok) {
+            const tvData = await tvResponse.json();
+            setTvShowSeasons(tvData.seasons || []);
+            // Update episode count for current season if we don't have it
+            if (!data.item.episodesInSeason) {
+              const currentSeasonData = tvData.seasons.find((s: any) => s.seasonNumber === (data.item.currentSeason || 1));
+              if (currentSeasonData) {
+                setEpisodesInSeason(currentSeasonData.episodeCount);
+              }
+            }
+          }
+        } catch (error) {
+          console.error('Failed to fetch TV show details:', error);
+        }
+      }
 
       // Format completedAt for input[type="date"]
       if (data.item.completedAt) {
@@ -256,8 +292,13 @@ export default function MediaDetailPage({ params }: { params: Promise<{ id: stri
                       id="current-season"
                       type="number"
                       min="1"
+                      max={totalSeasons || undefined}
                       value={currentSeason}
-                      onChange={(e) => setCurrentSeason(parseInt(e.target.value) || 1)}
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value) || 1;
+                        const max = totalSeasons || 999;
+                        setCurrentSeason(Math.min(Math.max(1, value), max));
+                      }}
                       className="h-11 sm:h-12"
                     />
                   </div>
@@ -267,8 +308,13 @@ export default function MediaDetailPage({ params }: { params: Promise<{ id: stri
                       id="current-episode"
                       type="number"
                       min="1"
+                      max={maxEpisodesInCurrentSeason || undefined}
                       value={currentEpisode}
-                      onChange={(e) => setCurrentEpisode(parseInt(e.target.value) || 1)}
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value) || 1;
+                        const max = maxEpisodesInCurrentSeason || 999;
+                        setCurrentEpisode(Math.min(Math.max(1, value), max));
+                      }}
                       className="h-11 sm:h-12"
                     />
                   </div>
@@ -276,7 +322,7 @@ export default function MediaDetailPage({ params }: { params: Promise<{ id: stri
                 {totalSeasons && (
                   <p className="text-xs text-muted-foreground">
                     Season {currentSeason} of {totalSeasons} total seasons
-                    {episodesInSeason && ` • Episode ${currentEpisode} of ${episodesInSeason}`}
+                    {maxEpisodesInCurrentSeason && ` • Episode ${currentEpisode} of ${maxEpisodesInCurrentSeason}`}
                   </p>
                 )}
               </div>
