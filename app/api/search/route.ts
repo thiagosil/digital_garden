@@ -68,16 +68,22 @@ async function searchBooks(query: string) {
 
 // TMDB API
 async function searchMovies(query: string) {
-  const apiKey = process.env.TMDB_API_KEY;
+  const accessToken = process.env.TMDB_ACCESS_TOKEN;
 
-  if (!apiKey) {
-    console.warn('TMDB_API_KEY not set, returning empty results');
+  if (!accessToken) {
+    console.warn('TMDB_ACCESS_TOKEN not set, returning empty results');
     return [];
   }
 
   try {
     const response = await fetch(
-      `https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&query=${encodeURIComponent(query)}`
+      `https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(query)}`,
+      {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        }
+      }
     );
 
     if (!response.ok) {
@@ -104,16 +110,22 @@ async function searchMovies(query: string) {
 }
 
 async function searchTVShows(query: string) {
-  const apiKey = process.env.TMDB_API_KEY;
+  const accessToken = process.env.TMDB_ACCESS_TOKEN;
 
-  if (!apiKey) {
-    console.warn('TMDB_API_KEY not set, returning empty results');
+  if (!accessToken) {
+    console.warn('TMDB_ACCESS_TOKEN not set, returning empty results');
     return [];
   }
 
   try {
     const response = await fetch(
-      `https://api.themoviedb.org/3/search/tv?api_key=${apiKey}&query=${encodeURIComponent(query)}`
+      `https://api.themoviedb.org/3/search/tv?query=${encodeURIComponent(query)}`,
+      {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        }
+      }
     );
 
     if (!response.ok) {
