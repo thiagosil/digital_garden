@@ -11,6 +11,7 @@ import { ArrowLeft, Save, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { StarRating } from '@/components/star-rating';
 import { MediaItem } from '@/lib/db';
+import { EpisodeList } from '@/components/episode-list';
 
 export default function MediaDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -138,6 +139,42 @@ export default function MediaDetailPage({ params }: { params: Promise<{ id: stri
       console.error('Failed to update item:', error);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleEpisodeClick = async (season: number, episode: number) => {
+    // Update local state
+    setCurrentSeason(season);
+    setCurrentEpisode(episode);
+
+    // Find the episode count for this season
+    const seasonData = tvShowSeasons.find(s => s.seasonNumber === season);
+    if (seasonData) {
+      setEpisodesInSeason(seasonData.episodeCount);
+    }
+
+    // Auto-save the progress
+    try {
+      const body: any = {
+        currentSeason: season,
+        currentEpisode: episode,
+        totalSeasons,
+        episodesInSeason: seasonData?.episodeCount || episodesInSeason,
+      };
+
+      // If not already IN_PROGRESS, set it
+      if (status !== 'IN_PROGRESS') {
+        body.status = 'IN_PROGRESS';
+        setStatus('IN_PROGRESS');
+      }
+
+      await fetch(`/api/media/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+    } catch (error) {
+      console.error('Failed to update episode:', error);
     }
   };
 
@@ -359,6 +396,23 @@ export default function MediaDetailPage({ params }: { params: Promise<{ id: stri
                 <p className="text-muted-foreground text-sm sm:text-base leading-relaxed font-light">
                   {item.synopsis}
                 </p>
+              </div>
+            )}
+
+            {/* Episode List - Only for TV shows */}
+            {item.mediaType === 'TV_SHOW' && item.apiId && tvShowSeasons.length > 0 && (
+              <div className="space-y-2 sm:space-y-3">
+                <EpisodeList
+                  tmdbId={item.apiId}
+                  seasons={tvShowSeasons.map(s => ({
+                    seasonNumber: s.seasonNumber,
+                    episodeCount: s.episodeCount,
+                    name: `Season ${s.seasonNumber}`
+                  }))}
+                  currentSeason={currentSeason}
+                  currentEpisode={currentEpisode}
+                  onEpisodeClick={handleEpisodeClick}
+                />
               </div>
             )}
 
