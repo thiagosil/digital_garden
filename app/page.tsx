@@ -138,7 +138,7 @@ export default function Home() {
             <p className="text-muted-foreground text-base sm:text-lg font-light">Loading...</p>
           </div>
         ) : (
-          <MediaGrid items={items} />
+          <MediaGrid items={items} onRefresh={fetchItems} />
         )}
       </div>
 

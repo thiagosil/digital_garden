@@ -27,6 +27,7 @@ model MediaItem {
   creator     String?  // Author, Director, Developer, etc.
   synopsis    String?
   notes       String?  // User's personal notes/review
+  rating      Int?     // Star rating 1-5
   completedAt DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

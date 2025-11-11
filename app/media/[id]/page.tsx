@@ -16,6 +16,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { ArrowLeft, Save, Trash2 } from 'lucide-react';
 import Link from 'next/link';
+import { StarRating } from '@/components/star-rating';
 
 interface MediaItem {
   id: string;
@@ -26,6 +27,7 @@ interface MediaItem {
   creator: string | null;
   synopsis: string | null;
   notes: string | null;
+  rating: number | null;
   completedAt: Date | null;
 }
 
@@ -37,6 +39,7 @@ export default function MediaDetailPage({ params }: { params: Promise<{ id: stri
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState('');
   const [notes, setNotes] = useState('');
+  const [rating, setRating] = useState<number | null>(null);
   const [completedAt, setCompletedAt] = useState('');
 
   useEffect(() => {
@@ -50,6 +53,7 @@ export default function MediaDetailPage({ params }: { params: Promise<{ id: stri
       setItem(data.item);
       setStatus(data.item.status);
       setNotes(data.item.notes || '');
+      setRating(data.item.rating || null);
 
       // Format completedAt for input[type="date"]
       if (data.item.completedAt) {
@@ -68,7 +72,7 @@ export default function MediaDetailPage({ params }: { params: Promise<{ id: stri
   const handleSave = async () => {
     setSaving(true);
     try {
-      const body: any = { status, notes };
+      const body: any = { status, notes, rating };
 
       // Include completedAt only if it's set and status is COMPLETED
       if (status === 'COMPLETED' && completedAt) {
@@ -183,6 +187,16 @@ export default function MediaDetailPage({ params }: { params: Promise<{ id: stri
                   <SelectItem value="COMPLETED">Completed</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            {/* Rating */}
+            <div className="space-y-2 sm:space-y-3">
+              <Label className="text-sm font-semibold">Rating</Label>
+              <StarRating
+                rating={rating}
+                onRatingChange={setRating}
+                size="md"
+              />
             </div>
 
             {/* Completion Date */}

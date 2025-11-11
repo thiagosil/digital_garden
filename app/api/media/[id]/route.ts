@@ -41,7 +41,7 @@ export async function PATCH(
 
     const { id } = await params;
     const body = await request.json();
-    const { status, notes, completedAt } = body;
+    const { status, notes, rating, completedAt } = body;
 
     const updateData: any = {};
 
@@ -65,6 +65,10 @@ export async function PATCH(
 
     if (notes !== undefined) {
       updateData.notes = notes;
+    }
+
+    if (rating !== undefined) {
+      updateData.rating = rating;
     }
 
     if (completedAt !== undefined) {

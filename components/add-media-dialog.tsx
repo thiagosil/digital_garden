@@ -38,6 +38,7 @@ interface AddMediaDialogProps {
 
 export function AddMediaDialog({ open, onOpenChange, onItemAdded, defaultMediaType }: AddMediaDialogProps) {
   const [mediaType, setMediaType] = useState<string>('');
+  const [status, setStatus] = useState<string>('BACKLOG');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [searching, setSearching] = useState(false);
@@ -79,6 +80,7 @@ export function AddMediaDialog({ open, onOpenChange, onItemAdded, defaultMediaTy
         body: JSON.stringify({
           title: result.title,
           mediaType,
+          status,
           coverImage: result.coverImage,
           creator: result.creator,
           synopsis: result.synopsis,
@@ -90,6 +92,7 @@ export function AddMediaDialog({ open, onOpenChange, onItemAdded, defaultMediaTy
         onItemAdded();
         // Reset state
         setMediaType('');
+        setStatus('BACKLOG');
         setSearchQuery('');
         setSearchResults([]);
       }
@@ -171,6 +174,39 @@ export function AddMediaDialog({ open, onOpenChange, onItemAdded, defaultMediaTy
               </Select>
             </div>
           )}
+
+          {/* Status Selection */}
+          <div className="space-y-1.5 sm:space-y-3">
+            <Label htmlFor="status" className="text-xs sm:text-sm font-semibold">Initial Status</Label>
+            <Select value={status} onValueChange={setStatus}>
+              <SelectTrigger id="status" className="h-10 sm:h-12">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="BACKLOG">
+                  {(mediaType || defaultMediaType) === 'BOOK' ? 'Want to Read' :
+                   (mediaType || defaultMediaType) === 'MOVIE' ? 'Want to Watch' :
+                   (mediaType || defaultMediaType) === 'TV_SHOW' ? 'Want to Watch' :
+                   (mediaType || defaultMediaType) === 'VIDEO_GAME' ? 'Want to Play' :
+                   'Want to'}
+                </SelectItem>
+                <SelectItem value="IN_PROGRESS">
+                  {(mediaType || defaultMediaType) === 'BOOK' ? 'Reading' :
+                   (mediaType || defaultMediaType) === 'MOVIE' ? 'Watching' :
+                   (mediaType || defaultMediaType) === 'TV_SHOW' ? 'Watching' :
+                   (mediaType || defaultMediaType) === 'VIDEO_GAME' ? 'Playing' :
+                   'In Progress'}
+                </SelectItem>
+                <SelectItem value="COMPLETED">
+                  {(mediaType || defaultMediaType) === 'BOOK' ? 'Read' :
+                   (mediaType || defaultMediaType) === 'MOVIE' ? 'Watched' :
+                   (mediaType || defaultMediaType) === 'TV_SHOW' ? 'Watched' :
+                   (mediaType || defaultMediaType) === 'VIDEO_GAME' ? 'Played' :
+                   'Completed'}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
           {/* Search Input */}
           <div className="flex gap-2">

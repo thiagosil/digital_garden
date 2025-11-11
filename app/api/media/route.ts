@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     await initializeDb();
 
     const body = await request.json();
-    const { title, mediaType, coverImage, creator, synopsis, apiId } = body;
+    const { title, mediaType, status, coverImage, creator, synopsis, apiId } = body;
 
     if (!title || !mediaType) {
       return NextResponse.json(
@@ -46,6 +46,7 @@ export async function POST(request: NextRequest) {
     const item = await mediaQueries.create({
       title,
       mediaType,
+      status,
       coverImage,
       creator,
       synopsis,
