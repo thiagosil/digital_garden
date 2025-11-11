@@ -7,16 +7,7 @@ import { BookshelfTabs } from '@/components/bookshelf-tabs';
 import { AddMediaDialog } from '@/components/add-media-dialog';
 import { Button } from '@/components/ui/button';
 import { PlusIcon } from '@phosphor-icons/react';
-
-interface MediaItem {
-  id: string;
-  title: string;
-  creator: string | null;
-  coverImage: string | null;
-  status: string;
-  completedAt: Date | null;
-  mediaType: string;
-}
+import { MediaItem } from '@/lib/db';
 
 export default function Home() {
   const searchParams = useSearchParams();
