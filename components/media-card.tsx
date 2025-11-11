@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { StarRating } from './star-rating';
+import { haptics } from '@/lib/haptics';
 
 interface MediaCardProps {
   id: string;
@@ -69,6 +70,7 @@ export function MediaCard({ id, title, creator, coverImage, status, mediaType, r
   };
 
   const handleNextEpisode = async () => {
+    haptics.light();
     setUpdating(true);
     try {
       const newEpisode = episode + 1;
@@ -127,8 +129,10 @@ export function MediaCard({ id, title, creator, coverImage, status, mediaType, r
               alt={title}
               fill
               className="object-cover transition-all duration-500 group-hover:scale-[1.02]"
-              sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
+              sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
               priority={false}
+              loading="lazy"
+              quality={85}
             />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center text-muted-foreground bg-muted">
@@ -139,7 +143,7 @@ export function MediaCard({ id, title, creator, coverImage, status, mediaType, r
           {/* Finished Badge */}
           {currentStatus === 'COMPLETED' && completedAt && (
             <div className="absolute bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm py-1.5 sm:py-2 px-2 sm:px-3">
-              <p className="text-[10px] sm:text-xs font-medium text-foreground text-center">
+              <p className="text-xs sm:text-sm font-medium text-foreground text-center">
                 Finished {new Date(completedAt).getFullYear()}
               </p>
             </div>
@@ -148,7 +152,7 @@ export function MediaCard({ id, title, creator, coverImage, status, mediaType, r
           {/* TV Show Progress Badge */}
           {mediaType === 'TV_SHOW' && currentStatus === 'IN_PROGRESS' && season && episode && (
             <div className="absolute bottom-0 left-0 right-0 bg-primary/95 backdrop-blur-sm py-1.5 sm:py-2 px-2 sm:px-3">
-              <p className="text-[10px] sm:text-xs font-medium text-primary-foreground text-center">
+              <p className="text-xs sm:text-sm font-medium text-primary-foreground text-center">
                 S{season}E{episode}
                 {episodesInSeason && ` of ${episodesInSeason}`}
               </p>
@@ -158,17 +162,17 @@ export function MediaCard({ id, title, creator, coverImage, status, mediaType, r
 
         {/* Media Info */}
         <div className="space-y-0.5 sm:space-y-1">
-          <h3 className="font-semibold text-xs sm:text-sm leading-snug line-clamp-2 group-hover:text-muted-foreground transition-colors">
+          <h3 className="font-semibold text-sm sm:text-base leading-snug line-clamp-2 group-hover:text-muted-foreground transition-colors">
             {title}
           </h3>
           {mediaType === 'TV_SHOW' && currentStatus === 'IN_PROGRESS' && season && episode ? (
-            <p className="text-[10px] sm:text-xs text-primary font-medium line-clamp-1">
+            <p className="text-xs sm:text-sm text-primary font-medium line-clamp-1">
               S{season}E{episode}
               {episodesInSeason && ` of ${episodesInSeason}`}
               {totalSeasons && ` • Season ${season}/${totalSeasons}`}
             </p>
           ) : (
-            <p className="text-[10px] sm:text-xs text-muted-foreground font-light line-clamp-1">
+            <p className="text-xs sm:text-sm text-muted-foreground font-light line-clamp-1">
               {creator}
             </p>
           )}
@@ -194,7 +198,7 @@ export function MediaCard({ id, title, creator, coverImage, status, mediaType, r
             <Button
               variant="outline"
               size="sm"
-              className="flex-1 h-8 text-xs"
+              className="flex-1 h-9 sm:h-10 text-sm"
               onClick={handleNextEpisode}
               disabled={updating}
             >
@@ -204,7 +208,7 @@ export function MediaCard({ id, title, creator, coverImage, status, mediaType, r
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 text-xs px-2"
+                className="h-9 sm:h-10 text-sm px-3"
               >
                 Edit
               </Button>
@@ -214,8 +218,9 @@ export function MediaCard({ id, title, creator, coverImage, status, mediaType, r
           <Button
             variant="outline"
             size="sm"
-            className="w-full h-8 text-xs"
+            className="w-full h-9 sm:h-10 text-sm"
             onClick={() => {
+              haptics.light();
               const action = getActionButton();
               if (action) handleStatusChange(action.nextStatus);
             }}

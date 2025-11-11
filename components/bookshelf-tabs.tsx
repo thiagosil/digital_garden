@@ -52,13 +52,13 @@ export function BookshelfTabs({ activeTab, onTabChange, mediaType }: BookshelfTa
 
   return (
     <div className="mb-12 sm:mb-16 border-b border-border">
-      <nav className="flex gap-1 sm:gap-2 -mb-px overflow-x-auto scrollbar-hide">
+      <nav className="flex gap-1 sm:gap-2 -mb-px overflow-x-auto scrollbar-hide scroll-smooth snap-x snap-mandatory">
         {tabs.map((tab) => (
           <button
             key={tab.value}
             onClick={() => onTabChange(tab.value)}
             className={`
-              py-3 sm:py-4 px-4 sm:px-6 text-xs sm:text-sm tracking-wide transition-all relative whitespace-nowrap flex-shrink-0
+              py-4 sm:py-4 px-6 sm:px-8 text-sm sm:text-base tracking-wide transition-all relative whitespace-nowrap flex-shrink-0 min-h-[48px] snap-center
               ${
                 activeTab === tab.value
                   ? 'text-foreground font-semibold'

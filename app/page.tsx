@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useEffect, useState, useRef } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { MediaGrid } from '@/components/media-grid';
 import { BookshelfTabs } from '@/components/bookshelf-tabs';
 import { AddMediaDialog } from '@/components/add-media-dialog';
@@ -11,11 +11,19 @@ import { MediaItem } from '@/lib/db';
 
 export default function Home() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [items, setItems] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string | null>(searchParams.get('status') || 'BACKLOG');
   const [typeFilter, setTypeFilter] = useState<string | null>(searchParams.get('type') || 'BOOK');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [pullDistance, setPullDistance] = useState(0);
+  const [isPulling, setIsPulling] = useState(false);
+  const touchStartY = useRef(0);
+  const touchStartX = useRef(0);
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  const mediaTypes = ['BOOK', 'MOVIE', 'TV_SHOW', 'VIDEO_GAME'];
 
   const fetchItems = async () => {
     setLoading(true);
@@ -50,6 +58,62 @@ export default function Home() {
   useEffect(() => {
     fetchItems();
   }, [statusFilter, typeFilter]);
+
+  // Pull-to-refresh and swipe gesture handlers
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+
+    if (window.scrollY === 0 && !loading) {
+      setIsPulling(true);
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isPulling || loading) return;
+
+    const currentY = e.touches[0].clientY;
+    const distance = currentY - touchStartY.current;
+
+    if (distance > 0) {
+      // Add resistance to the pull
+      const adjustedDistance = Math.min(distance * 0.5, 100);
+      setPullDistance(adjustedDistance);
+    }
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const touchEndX = e.changedTouches[0].clientX;
+    const touchEndY = e.changedTouches[0].clientY;
+    const deltaX = touchEndX - touchStartX.current;
+    const deltaY = touchEndY - touchStartY.current;
+
+    // Check if it's a horizontal swipe (more horizontal than vertical)
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 100) {
+      const currentIndex = mediaTypes.indexOf(typeFilter || 'BOOK');
+
+      if (deltaX < 0 && currentIndex < mediaTypes.length - 1) {
+        // Swipe left - next type
+        router.push(`/?type=${mediaTypes[currentIndex + 1]}&status=${statusFilter}`);
+      } else if (deltaX > 0 && currentIndex > 0) {
+        // Swipe right - previous type
+        router.push(`/?type=${mediaTypes[currentIndex - 1]}&status=${statusFilter}`);
+      }
+    }
+
+    // Handle pull-to-refresh
+    if (isPulling) {
+      if (pullDistance > 60) {
+        fetchItems();
+      }
+
+      setIsPulling(false);
+      setPullDistance(0);
+    }
+
+    touchStartY.current = 0;
+    touchStartX.current = 0;
+  };
 
   const handleItemAdded = () => {
     setIsAddDialogOpen(false);
@@ -92,7 +156,25 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-background">
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-8 lg:px-12 py-3 sm:py-12 lg:py-20 mobile-content">
+      {/* Pull-to-refresh indicator */}
+      {isPulling && (
+        <div
+          className="fixed top-0 left-0 right-0 z-50 flex items-center justify-center transition-all duration-200 md:hidden"
+          style={{ height: `${pullDistance}px` }}
+        >
+          <div className="text-muted-foreground text-sm font-medium">
+            {pullDistance > 60 ? 'Release to refresh' : 'Pull to refresh'}
+          </div>
+        </div>
+      )}
+      <div
+        ref={contentRef}
+        className="max-w-[1400px] mx-auto px-4 sm:px-8 lg:px-12 py-3 sm:py-12 lg:py-20 mobile-content transition-transform duration-200"
+        style={{ transform: `translateY(${pullDistance}px)` }}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
         {/* Header */}
         <div className="mb-4 sm:mb-12 lg:mb-16">
           <div className="space-y-2 sm:space-y-4">
@@ -121,13 +203,13 @@ export default function Home() {
         />
 
         {/* Grid */}
-        {loading ? (
-          <div className="text-center py-16 sm:py-20">
-            <p className="text-muted-foreground text-base sm:text-lg font-light">Loading...</p>
-          </div>
-        ) : (
-          <MediaGrid items={items} onRefresh={fetchItems} />
-        )}
+        <MediaGrid
+          items={items}
+          onRefresh={fetchItems}
+          mediaType={typeFilter || 'BOOK'}
+          onAddClick={() => setIsAddDialogOpen(true)}
+          loading={loading}
+        />
       </div>
 
       <AddMediaDialog
