@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { Plus, LogOut } from 'lucide-react';
 import { Drop } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface NavigationHeaderProps {
   onAddMedia?: () => void;
@@ -16,6 +16,7 @@ export function NavigationHeader({ onAddMedia }: NavigationHeaderProps) {
   const router = useRouter();
   const activeType = searchParams.get('type') || 'BOOK';
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
@@ -28,6 +29,20 @@ export function NavigationHeader({ onAddMedia }: NavigationHeaderProps) {
       setIsLoggingOut(false);
     }
   };
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch('/api/auth/session');
+        const data = await response.json();
+        setIsAuthenticated(data.authenticated);
+      } catch (error) {
+        console.error('Error checking authentication:', error);
+        setIsAuthenticated(false);
+      }
+    };
+    checkAuth();
+  }, []);
 
   return (
     <header className="border-b border-border bg-background">
@@ -78,27 +93,29 @@ export function NavigationHeader({ onAddMedia }: NavigationHeaderProps) {
           </nav>
 
           {/* Add Media Button & Logout */}
-          <div className="flex items-center gap-2">
-            <Button
-              onClick={onAddMedia}
-              variant="ghost"
-              size="sm"
-              className="shrink-0 text-sm font-medium hover:text-foreground"
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              Add Media
-            </Button>
-            <Button
-              onClick={handleLogout}
-              variant="ghost"
-              size="sm"
-              className="shrink-0 text-sm font-medium hover:text-foreground"
-              disabled={isLoggingOut}
-            >
-              <LogOut className="mr-2 h-4 w-4" />
-              {isLoggingOut ? 'Logging out...' : 'Logout'}
-            </Button>
-          </div>
+          {isAuthenticated && (
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={onAddMedia}
+                variant="ghost"
+                size="sm"
+                className="shrink-0 text-sm font-medium hover:text-foreground"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Add Media
+              </Button>
+              <Button
+                onClick={handleLogout}
+                variant="ghost"
+                size="sm"
+                className="shrink-0 text-sm font-medium hover:text-foreground"
+                disabled={isLoggingOut}
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                {isLoggingOut ? 'Logging out...' : 'Logout'}
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </header>
