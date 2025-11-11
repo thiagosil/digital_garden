@@ -58,17 +58,17 @@ export function BookshelfTabs({ activeTab, onTabChange, mediaType }: BookshelfTa
             key={tab.value}
             onClick={() => onTabChange(tab.value)}
             className={`
-              py-4 px-6 text-sm tracking-wide transition-all relative rounded-t-lg
+              py-4 px-6 text-sm tracking-wide transition-all relative
               ${
                 activeTab === tab.value
-                  ? 'text-foreground font-semibold bg-accent-rust/10'
-                  : 'text-muted-foreground font-medium hover:text-foreground hover:bg-accent/50'
+                  ? 'text-foreground font-semibold'
+                  : 'text-muted-foreground font-medium hover:text-foreground'
               }
             `}
           >
             {tab.label}
             {activeTab === tab.value && (
-              <span className="absolute bottom-0 left-0 right-0 h-[3px] bg-accent-rust rounded-t-sm" />
+              <span className="absolute bottom-0 left-0 right-0 h-1 bg-orange-500" />
             )}
           </button>
         ))}

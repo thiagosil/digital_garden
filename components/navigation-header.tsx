@@ -2,8 +2,7 @@
 
 import Link from 'next/link';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
-import { Plus, LogOut } from 'lucide-react';
-import { Drop } from '@phosphor-icons/react';
+import { DropIcon, PlusIcon, SignOutIcon } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import { useState, useEffect } from 'react';
 
@@ -52,12 +51,25 @@ export function NavigationHeader({ onAddMedia }: NavigationHeaderProps) {
     <header className="border-b border-border bg-background">
       <div className="max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-12 py-6">
         <div className="flex items-center justify-between">
-          {/* Logo and Site Name */}
-          <div className="flex items-center">
-            <div className="w-12 h-12 bg-foreground rounded-lg flex items-center justify-center">
-              <Drop size={28} weight="fill" className="text-background" />
+          {/* Logo, Site Name & Add Media */}
+          <div className="flex items-center gap-4">
+            <div className="flex items-center">
+              <div className="w-12 h-12 bg-foreground rounded-lg flex items-center justify-center">
+                <DropIcon size={28} weight="fill" className="text-background" />
+              </div>
+              <span className="text-xl font-semibold tracking-tight lowercase">echo</span>
             </div>
-            <span className="text-xl font-semibold tracking-tight lowercase">echo</span>
+
+            {isAuthenticated && (
+              <Button
+                onClick={onAddMedia}
+                variant="ghost"
+                size="sm"
+                className="shrink-0 text-foreground hover:text-foreground/80 [&_svg]:!size-auto"
+              >
+                <PlusIcon size={20} weight="bold" />
+              </Button>
+            )}
           </div>
 
           {/* Navigation Links */}
@@ -96,29 +108,17 @@ export function NavigationHeader({ onAddMedia }: NavigationHeaderProps) {
             </Link>
           </nav>
 
-          {/* Add Media Button & Logout */}
+          {/* Logout */}
           {isAuthenticated && (
-            <div className="flex items-center gap-2">
-              <Button
-                onClick={onAddMedia}
-                variant="ghost"
-                size="sm"
-                className="shrink-0 text-sm font-medium hover:text-foreground"
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                Add Media
-              </Button>
-              <Button
-                onClick={handleLogout}
-                variant="ghost"
-                size="sm"
-                className="shrink-0 text-sm font-medium hover:text-foreground"
-                disabled={isLoggingOut}
-              >
-                <LogOut className="mr-2 h-4 w-4" />
-                {isLoggingOut ? 'Logging out...' : 'Logout'}
-              </Button>
-            </div>
+            <Button
+              onClick={handleLogout}
+              variant="ghost"
+              size="sm"
+              className="shrink-0 text-foreground hover:text-foreground/80 [&_svg]:!size-auto"
+              disabled={isLoggingOut}
+            >
+              <SignOutIcon size={20} weight="bold" />
+            </Button>
           )}
         </div>
       </div>
