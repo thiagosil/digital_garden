@@ -116,6 +116,7 @@ export function MediaCard({ id, title, creator, coverImage, status, mediaType, c
             {creator}
           </p>
         </div>
+        </div>
       </Link>
 
       {/* Quick Status Change */}
