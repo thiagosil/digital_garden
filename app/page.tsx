@@ -4,6 +4,9 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { MediaGrid } from '@/components/media-grid';
 import { BookshelfTabs } from '@/components/bookshelf-tabs';
+import { AddMediaDialog } from '@/components/add-media-dialog';
+import { Button } from '@/components/ui/button';
+import { PlusIcon } from '@phosphor-icons/react';
 
 interface MediaItem {
   id: string;
@@ -21,6 +24,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string | null>('COMPLETED');
   const [typeFilter, setTypeFilter] = useState<string | null>(searchParams.get('type') || 'BOOK');
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
   const fetchItems = async () => {
     setLoading(true);
@@ -55,6 +59,12 @@ export default function Home() {
   useEffect(() => {
     fetchItems();
   }, [statusFilter, typeFilter]);
+
+  const handleItemAdded = () => {
+    setIsAddDialogOpen(false);
+    // Trigger a page refresh to show the new item
+    window.location.reload();
+  };
 
   // Dynamic content based on media type
   const getPageContent = () => {
@@ -98,7 +108,17 @@ export default function Home() {
             <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider">
               LIBRARY
             </p>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight">{pageContent.title}</h1>
+            <div className="flex items-center justify-between gap-4">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight">{pageContent.title}</h1>
+              <Button
+                onClick={() => setIsAddDialogOpen(true)}
+                variant="ghost"
+                size="sm"
+                className="shrink-0 text-foreground hover:text-foreground/80 [&_svg]:!size-auto h-11 w-11 p-0"
+              >
+                <PlusIcon size={24} weight="bold" />
+              </Button>
+            </div>
             <p className="text-muted-foreground text-sm sm:text-base lg:text-lg max-w-3xl font-light">
               {pageContent.description}
             </p>
@@ -121,6 +141,13 @@ export default function Home() {
           <MediaGrid items={items} />
         )}
       </div>
+
+      <AddMediaDialog
+        open={isAddDialogOpen}
+        onOpenChange={setIsAddDialogOpen}
+        onItemAdded={handleItemAdded}
+        defaultMediaType={typeFilter || 'BOOK'}
+      />
     </main>
   );
 }

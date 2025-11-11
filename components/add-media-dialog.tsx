@@ -130,28 +130,47 @@ export function AddMediaDialog({ open, onOpenChange, onItemAdded, defaultMediaTy
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[85vh] sm:max-h-[80vh] overflow-y-auto p-4 sm:p-6">
         <DialogHeader className="space-y-2 sm:space-y-3">
-          <DialogTitle className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight">Add New Media</DialogTitle>
+          <DialogTitle className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight">
+            {defaultMediaType ? `Add New ${
+              defaultMediaType === 'BOOK' ? 'Book' :
+              defaultMediaType === 'MOVIE' ? 'Movie' :
+              defaultMediaType === 'TV_SHOW' ? 'TV Show' :
+              defaultMediaType === 'VIDEO_GAME' ? 'Video Game' :
+              'Media'
+            }` : 'Add New Media'}
+          </DialogTitle>
           <DialogDescription className="text-sm sm:text-base font-light text-muted-foreground">
-            Search for a book, movie, TV show, or video game to add to your collection.
+            {defaultMediaType ?
+              `Search and add ${
+                defaultMediaType === 'BOOK' ? 'a book' :
+                defaultMediaType === 'MOVIE' ? 'a movie' :
+                defaultMediaType === 'TV_SHOW' ? 'a TV show' :
+                defaultMediaType === 'VIDEO_GAME' ? 'a video game' :
+                'media'
+              } to your collection.` :
+              'Search for a book, movie, TV show, or video game to add to your collection.'
+            }
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 sm:space-y-6 pt-2">
-          {/* Media Type Selection */}
-          <div className="space-y-2 sm:space-y-3">
-            <Label htmlFor="media-type" className="text-sm font-semibold">Media Type</Label>
-            <Select value={mediaType} onValueChange={setMediaType}>
-              <SelectTrigger id="media-type" className="h-11 sm:h-12">
-                <SelectValue placeholder="Select media type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="BOOK">Book</SelectItem>
-                <SelectItem value="MOVIE">Movie</SelectItem>
-                <SelectItem value="TV_SHOW">TV Show</SelectItem>
-                <SelectItem value="VIDEO_GAME">Video Game</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          {/* Media Type Selection - Only show if no default type */}
+          {!defaultMediaType && (
+            <div className="space-y-2 sm:space-y-3">
+              <Label htmlFor="media-type" className="text-sm font-semibold">Media Type</Label>
+              <Select value={mediaType} onValueChange={setMediaType}>
+                <SelectTrigger id="media-type" className="h-11 sm:h-12">
+                  <SelectValue placeholder="Select media type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="BOOK">Book</SelectItem>
+                  <SelectItem value="MOVIE">Movie</SelectItem>
+                  <SelectItem value="TV_SHOW">TV Show</SelectItem>
+                  <SelectItem value="VIDEO_GAME">Video Game</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           {/* Search Input */}
           <div className="space-y-2 sm:space-y-3">

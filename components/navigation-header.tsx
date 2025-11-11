@@ -2,15 +2,13 @@
 
 import Link from 'next/link';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
-import { DropIcon, PlusIcon, SignOutIcon, ListIcon, XIcon } from '@phosphor-icons/react';
+import { DropIcon, SignOutIcon, ListIcon, XIcon } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import { useState, useEffect } from 'react';
 
-interface NavigationHeaderProps {
-  onAddMedia?: (mediaType: string) => void;
-}
+interface NavigationHeaderProps {}
 
-export function NavigationHeader({ onAddMedia }: NavigationHeaderProps) {
+export function NavigationHeader({}: NavigationHeaderProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -119,28 +117,18 @@ export function NavigationHeader({ onAddMedia }: NavigationHeaderProps) {
               </Link>
             </nav>
 
-            {/* Add Media & Logout */}
+            {/* Logout */}
             <div className="flex items-center gap-2">
               {isAuthenticated && (
-                <>
-                  <Button
-                    onClick={() => onAddMedia?.(activeType)}
-                    variant="ghost"
-                    size="sm"
-                    className="shrink-0 text-foreground hover:text-foreground/80 [&_svg]:!size-auto h-11 w-11 p-0"
-                  >
-                    <PlusIcon size={24} weight="bold" />
-                  </Button>
-                  <Button
-                    onClick={handleLogout}
-                    variant="ghost"
-                    size="sm"
-                    className="shrink-0 text-foreground hover:text-foreground/80 [&_svg]:!size-auto h-11 w-11 p-0"
-                    disabled={isLoggingOut}
-                  >
-                    <SignOutIcon size={24} weight="bold" />
-                  </Button>
-                </>
+                <Button
+                  onClick={handleLogout}
+                  variant="ghost"
+                  size="sm"
+                  className="shrink-0 text-foreground hover:text-foreground/80 [&_svg]:!size-auto h-11 w-11 p-0"
+                  disabled={isLoggingOut}
+                >
+                  <SignOutIcon size={24} weight="bold" />
+                </Button>
               )}
             </div>
           </div>
