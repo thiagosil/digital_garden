@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { Plus, LogOut } from 'lucide-react';
 import { Drop } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
@@ -14,12 +14,14 @@ interface NavigationHeaderProps {
 export function NavigationHeader({ onAddMedia }: NavigationHeaderProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const pathname = usePathname();
   const activeType = searchParams.get('type') || 'BOOK';
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
+    setIsAuthenticated(false);
     try {
       await fetch('/api/auth/logout', { method: 'POST' });
       router.push('/login');
@@ -36,13 +38,15 @@ export function NavigationHeader({ onAddMedia }: NavigationHeaderProps) {
         const response = await fetch('/api/auth/session');
         const data = await response.json();
         setIsAuthenticated(data.authenticated);
+        setIsLoggingOut(false);
       } catch (error) {
         console.error('Error checking authentication:', error);
         setIsAuthenticated(false);
+        setIsLoggingOut(false);
       }
     };
     checkAuth();
-  }, []);
+  }, [pathname]);
 
   return (
     <header className="border-b border-border bg-background">
