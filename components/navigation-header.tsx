@@ -58,25 +58,29 @@ export function NavigationHeader({ onAddMedia }: NavigationHeaderProps) {
       <header className="border-b border-border bg-background">
         <div className="max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-12 py-6">
           <div className="flex items-center justify-between">
-            {/* Logo, Site Name & Add Media */}
+            {/* Mobile Menu Button & Logo */}
             <div className="flex items-center gap-3 sm:gap-4">
+              {isAuthenticated && (
+                <Button
+                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                  variant="ghost"
+                  size="sm"
+                  className="md:hidden shrink-0 text-foreground hover:text-foreground/80 [&_svg]:!size-auto h-11 w-11 p-0"
+                >
+                  {mobileMenuOpen ? (
+                    <XIcon size={24} weight="bold" />
+                  ) : (
+                    <ListIcon size={24} weight="bold" />
+                  )}
+                </Button>
+              )}
+
               <div className="flex items-center">
                 <div className="w-12 h-12 bg-foreground rounded-lg flex items-center justify-center">
                   <DropIcon size={28} weight="fill" className="text-background" />
                 </div>
                 <span className="text-xl font-semibold tracking-tight lowercase">echo</span>
               </div>
-
-              {isAuthenticated && (
-                <Button
-                  onClick={onAddMedia}
-                  variant="ghost"
-                  size="sm"
-                  className="shrink-0 text-foreground hover:text-foreground/80 [&_svg]:!size-auto h-11 w-11 p-0"
-                >
-                  <PlusIcon size={24} weight="bold" />
-                </Button>
-              )}
             </div>
 
             {/* Desktop Navigation Links */}
@@ -115,21 +119,17 @@ export function NavigationHeader({ onAddMedia }: NavigationHeaderProps) {
               </Link>
             </nav>
 
-            {/* Mobile Menu Button & Logout */}
+            {/* Add Media & Logout */}
             <div className="flex items-center gap-2">
               {isAuthenticated && (
                 <>
                   <Button
-                    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                    onClick={onAddMedia}
                     variant="ghost"
                     size="sm"
-                    className="md:hidden shrink-0 text-foreground hover:text-foreground/80 [&_svg]:!size-auto h-11 w-11 p-0"
+                    className="shrink-0 text-foreground hover:text-foreground/80 [&_svg]:!size-auto h-11 w-11 p-0"
                   >
-                    {mobileMenuOpen ? (
-                      <XIcon size={24} weight="bold" />
-                    ) : (
-                      <ListIcon size={24} weight="bold" />
-                    )}
+                    <PlusIcon size={24} weight="bold" />
                   </Button>
                   <Button
                     onClick={handleLogout}
