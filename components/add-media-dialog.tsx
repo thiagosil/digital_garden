@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -41,8 +41,9 @@ export function AddMediaDialog({ open, onOpenChange, onItemAdded }: AddMediaDial
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [searching, setSearching] = useState(false);
   const [adding, setAdding] = useState(false);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const handleSearch = async () => {
+  const handleSearch = useCallback(async () => {
     if (!mediaType || !searchQuery.trim()) {
       return;
     }
@@ -59,7 +60,7 @@ export function AddMediaDialog({ open, onOpenChange, onItemAdded }: AddMediaDial
     } finally {
       setSearching(false);
     }
-  };
+  }, [mediaType, searchQuery]);
 
   const handleAddItem = async (result: SearchResult) => {
     setAdding(true);
@@ -90,6 +91,32 @@ export function AddMediaDialog({ open, onOpenChange, onItemAdded }: AddMediaDial
       setAdding(false);
     }
   };
+
+  // Debounce search: automatically search after user stops typing
+  useEffect(() => {
+    // Clear previous timer
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    // Don't search if query is empty or media type not selected
+    if (!searchQuery.trim() || !mediaType) {
+      setSearchResults([]);
+      return;
+    }
+
+    // Set new timer to trigger search after 500ms
+    debounceTimerRef.current = setTimeout(() => {
+      handleSearch();
+    }, 500);
+
+    // Cleanup function
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, [searchQuery, mediaType, handleSearch]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
