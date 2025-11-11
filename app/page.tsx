@@ -91,15 +91,15 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-background">
-      <div className="max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-12 py-16 sm:py-20">
+      <div className="max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-12 py-12 sm:py-16 lg:py-20">
         {/* Header */}
-        <div className="mb-12 sm:mb-16">
-          <div className="space-y-4">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+        <div className="mb-8 sm:mb-12 lg:mb-16">
+          <div className="space-y-3 sm:space-y-4">
+            <p className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wider">
               LIBRARY
             </p>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight">{pageContent.title}</h1>
-            <p className="text-muted-foreground text-base sm:text-lg max-w-3xl font-light">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight">{pageContent.title}</h1>
+            <p className="text-muted-foreground text-sm sm:text-base lg:text-lg max-w-3xl font-light">
               {pageContent.description}
             </p>
           </div>
@@ -114,8 +114,8 @@ export default function Home() {
 
         {/* Grid */}
         {loading ? (
-          <div className="text-center py-20">
-            <p className="text-muted-foreground text-lg font-light">Loading...</p>
+          <div className="text-center py-16 sm:py-20">
+            <p className="text-muted-foreground text-base sm:text-lg font-light">Loading...</p>
           </div>
         ) : (
           <MediaGrid items={items} />

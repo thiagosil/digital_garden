@@ -141,19 +141,20 @@ export default function MediaDetailPage({ params }: { params: Promise<{ id: stri
 
   return (
     <main className="min-h-screen bg-background">
-      <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-12 py-12 sm:py-16">
+      <div className="max-w-5xl mx-auto px-6 sm:px-8 lg:px-12 py-8 sm:py-12 lg:py-16">
         {/* Back Button */}
-        <Link href="/" className="inline-block mb-8 sm:mb-12">
-          <Button variant="ghost" size="sm" className="font-medium">
+        <Link href="/" className="inline-block mb-6 sm:mb-8 lg:mb-12">
+          <Button variant="ghost" size="sm" className="font-medium h-10 sm:h-11">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Library
+            <span className="hidden sm:inline">Back to Library</span>
+            <span className="sm:hidden">Back</span>
           </Button>
         </Link>
 
-        <div className="grid md:grid-cols-[320px_1fr] gap-10 lg:gap-12">
+        <div className="grid md:grid-cols-[280px_1fr] lg:grid-cols-[320px_1fr] gap-6 sm:gap-8 lg:gap-12">
           {/* Cover Image */}
-          <div className="space-y-6">
-            <div className="relative aspect-[2/3] bg-muted rounded-md overflow-hidden shadow-lg">
+          <div className="space-y-4 sm:space-y-6">
+            <div className="relative aspect-[2/3] max-w-[240px] sm:max-w-none mx-auto sm:mx-0 bg-muted rounded-md overflow-hidden shadow-lg">
               {item.coverImage ? (
                 <Image
                   src={item.coverImage}
@@ -164,16 +165,16 @@ export default function MediaDetailPage({ params }: { params: Promise<{ id: stri
                 />
               ) : (
                 <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
-                  <span className="text-center p-4 font-light">No cover image</span>
+                  <span className="text-center p-4 font-light text-sm">No cover image</span>
                 </div>
               )}
             </div>
 
             {/* Status Selector */}
-            <div className="space-y-3">
+            <div className="space-y-2 sm:space-y-3">
               <Label htmlFor="status" className="text-sm font-semibold">Status</Label>
               <Select value={status} onValueChange={setStatus}>
-                <SelectTrigger id="status">
+                <SelectTrigger id="status" className="h-11 sm:h-12">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -186,73 +187,73 @@ export default function MediaDetailPage({ params }: { params: Promise<{ id: stri
 
             {/* Completion Date */}
             {status === 'COMPLETED' && (
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
                 <Label htmlFor="completedAt" className="text-sm font-semibold">Completion Date</Label>
                 <Input
                   id="completedAt"
                   type="date"
                   value={completedAt}
                   onChange={(e) => setCompletedAt(e.target.value)}
-                  className="w-full"
+                  className="w-full h-11 sm:h-12"
                 />
               </div>
             )}
           </div>
 
           {/* Details */}
-          <div className="space-y-8">
-            <div className="space-y-3">
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight">
+          <div className="space-y-6 sm:space-y-8">
+            <div className="space-y-2 sm:space-y-3">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold leading-tight">
                 {item.title}
               </h1>
-              <p className="text-lg sm:text-xl text-muted-foreground font-light">
+              <p className="text-base sm:text-lg lg:text-xl text-muted-foreground font-light">
                 {item.creator}
               </p>
-              <div className="inline-block px-4 py-1.5 bg-muted rounded-full text-xs font-medium uppercase tracking-wider">
+              <div className="inline-block px-3 sm:px-4 py-1 sm:py-1.5 bg-muted rounded-full text-[10px] sm:text-xs font-medium uppercase tracking-wider">
                 {item.mediaType.replace('_', ' ')}
               </div>
             </div>
 
             {/* Synopsis */}
             {item.synopsis && (
-              <div className="space-y-3">
-                <h2 className="text-xl font-semibold">Synopsis</h2>
-                <p className="text-muted-foreground leading-relaxed font-light">
+              <div className="space-y-2 sm:space-y-3">
+                <h2 className="text-lg sm:text-xl font-semibold">Synopsis</h2>
+                <p className="text-muted-foreground text-sm sm:text-base leading-relaxed font-light">
                   {item.synopsis}
                 </p>
               </div>
             )}
 
             {/* Personal Notes */}
-            <div className="space-y-3">
-              <Label htmlFor="notes" className="text-base font-semibold">Your Notes</Label>
+            <div className="space-y-2 sm:space-y-3">
+              <Label htmlFor="notes" className="text-sm sm:text-base font-semibold">Your Notes</Label>
               <Textarea
                 id="notes"
                 placeholder="Write your thoughts, review, or personal notes here..."
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                className="mt-2 min-h-[240px] text-base leading-relaxed"
+                className="mt-2 min-h-[200px] sm:min-h-[240px] text-sm sm:text-base leading-relaxed"
               />
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-3 pt-4">
+            <div className="flex flex-col sm:flex-row gap-3 pt-2 sm:pt-4">
               <Button
                 onClick={handleSave}
                 disabled={saving}
-                className="flex-1 font-medium"
+                className="flex-1 font-medium h-11 sm:h-12"
                 size="lg"
               >
-                <Save className="mr-2 h-5 w-5" />
+                <Save className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
                 {saving ? 'Saving...' : 'Save Changes'}
               </Button>
               <Button
                 variant="destructive"
                 onClick={handleDelete}
                 size="lg"
-                className="sm:w-auto font-medium"
+                className="sm:w-auto font-medium h-11 sm:h-12"
               >
-                <Trash2 className="mr-2 h-5 w-5" />
+                <Trash2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
                 Delete
               </Button>
             </div>

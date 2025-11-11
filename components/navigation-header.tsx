@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
-import { DropIcon, PlusIcon, SignOutIcon } from '@phosphor-icons/react';
+import { DropIcon, PlusIcon, SignOutIcon, ListIcon, XIcon } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import { useState, useEffect } from 'react';
 
@@ -17,10 +17,12 @@ export function NavigationHeader({ onAddMedia }: NavigationHeaderProps) {
   const activeType = searchParams.get('type') || 'BOOK';
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
     setIsAuthenticated(false);
+    setMobileMenuOpen(false);
     try {
       await fetch('/api/auth/logout', { method: 'POST' });
       router.push('/login');
@@ -29,6 +31,10 @@ export function NavigationHeader({ onAddMedia }: NavigationHeaderProps) {
       console.error('Logout error:', error);
       setIsLoggingOut(false);
     }
+  };
+
+  const handleNavClick = () => {
+    setMobileMenuOpen(false);
   };
 
   useEffect(() => {
@@ -48,35 +54,107 @@ export function NavigationHeader({ onAddMedia }: NavigationHeaderProps) {
   }, [pathname]);
 
   return (
-    <header className="border-b border-border bg-background">
-      <div className="max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-12 py-6">
-        <div className="flex items-center justify-between">
-          {/* Logo, Site Name & Add Media */}
-          <div className="flex items-center gap-4">
-            <div className="flex items-center">
-              <div className="w-12 h-12 bg-foreground rounded-lg flex items-center justify-center">
-                <DropIcon size={28} weight="fill" className="text-background" />
+    <>
+      <header className="border-b border-border bg-background">
+        <div className="max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-12 py-6">
+          <div className="flex items-center justify-between">
+            {/* Mobile Menu Button & Logo */}
+            <div className="flex items-center gap-3 sm:gap-4">
+              {isAuthenticated && (
+                <Button
+                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                  variant="ghost"
+                  size="sm"
+                  className="md:hidden shrink-0 text-foreground hover:text-foreground/80 [&_svg]:!size-auto h-11 w-11 p-0"
+                >
+                  {mobileMenuOpen ? (
+                    <XIcon size={24} weight="bold" />
+                  ) : (
+                    <ListIcon size={24} weight="bold" />
+                  )}
+                </Button>
+              )}
+
+              <div className="flex items-center">
+                <div className="w-12 h-12 bg-foreground rounded-lg flex items-center justify-center">
+                  <DropIcon size={28} weight="fill" className="text-background" />
+                </div>
+                <span className="text-xl font-semibold tracking-tight lowercase">echo</span>
               </div>
-              <span className="text-xl font-semibold tracking-tight lowercase">echo</span>
             </div>
 
-            {isAuthenticated && (
-              <Button
-                onClick={onAddMedia}
-                variant="ghost"
-                size="sm"
-                className="shrink-0 text-foreground hover:text-foreground/80 [&_svg]:!size-auto"
+            {/* Desktop Navigation Links */}
+            <nav className="hidden md:flex items-center gap-8">
+              <Link
+                href="/?type=BOOK"
+                className={`text-sm font-medium transition-colors ${
+                  activeType === 'BOOK' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
+                }`}
               >
-                <PlusIcon size={20} weight="bold" />
-              </Button>
-            )}
-          </div>
+                BOOKS
+              </Link>
+              <Link
+                href="/?type=MOVIE"
+                className={`text-sm font-medium transition-colors ${
+                  activeType === 'MOVIE' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                MOVIES
+              </Link>
+              <Link
+                href="/?type=TV_SHOW"
+                className={`text-sm font-medium transition-colors ${
+                  activeType === 'TV_SHOW' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                TV SHOWS
+              </Link>
+              <Link
+                href="/?type=VIDEO_GAME"
+                className={`text-sm font-medium transition-colors ${
+                  activeType === 'VIDEO_GAME' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                GAMES
+              </Link>
+            </nav>
 
-          {/* Navigation Links */}
-          <nav className="hidden md:flex items-center gap-8">
+            {/* Add Media & Logout */}
+            <div className="flex items-center gap-2">
+              {isAuthenticated && (
+                <>
+                  <Button
+                    onClick={onAddMedia}
+                    variant="ghost"
+                    size="sm"
+                    className="shrink-0 text-foreground hover:text-foreground/80 [&_svg]:!size-auto h-11 w-11 p-0"
+                  >
+                    <PlusIcon size={24} weight="bold" />
+                  </Button>
+                  <Button
+                    onClick={handleLogout}
+                    variant="ghost"
+                    size="sm"
+                    className="shrink-0 text-foreground hover:text-foreground/80 [&_svg]:!size-auto h-11 w-11 p-0"
+                    disabled={isLoggingOut}
+                  >
+                    <SignOutIcon size={24} weight="bold" />
+                  </Button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Mobile Menu Overlay */}
+      {mobileMenuOpen && isAuthenticated && (
+        <div className="md:hidden fixed inset-0 z-50 bg-background/95 backdrop-blur-sm">
+          <div className="flex flex-col items-center justify-center h-full gap-8 px-6">
             <Link
               href="/?type=BOOK"
-              className={`text-sm font-medium transition-colors ${
+              onClick={handleNavClick}
+              className={`text-2xl font-semibold transition-colors ${
                 activeType === 'BOOK' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
               }`}
             >
@@ -84,7 +162,8 @@ export function NavigationHeader({ onAddMedia }: NavigationHeaderProps) {
             </Link>
             <Link
               href="/?type=MOVIE"
-              className={`text-sm font-medium transition-colors ${
+              onClick={handleNavClick}
+              className={`text-2xl font-semibold transition-colors ${
                 activeType === 'MOVIE' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
               }`}
             >
@@ -92,7 +171,8 @@ export function NavigationHeader({ onAddMedia }: NavigationHeaderProps) {
             </Link>
             <Link
               href="/?type=TV_SHOW"
-              className={`text-sm font-medium transition-colors ${
+              onClick={handleNavClick}
+              className={`text-2xl font-semibold transition-colors ${
                 activeType === 'TV_SHOW' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
               }`}
             >
@@ -100,28 +180,16 @@ export function NavigationHeader({ onAddMedia }: NavigationHeaderProps) {
             </Link>
             <Link
               href="/?type=VIDEO_GAME"
-              className={`text-sm font-medium transition-colors ${
+              onClick={handleNavClick}
+              className={`text-2xl font-semibold transition-colors ${
                 activeType === 'VIDEO_GAME' ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               GAMES
             </Link>
-          </nav>
-
-          {/* Logout */}
-          {isAuthenticated && (
-            <Button
-              onClick={handleLogout}
-              variant="ghost"
-              size="sm"
-              className="shrink-0 text-foreground hover:text-foreground/80 [&_svg]:!size-auto"
-              disabled={isLoggingOut}
-            >
-              <SignOutIcon size={20} weight="bold" />
-            </Button>
-          )}
+          </div>
         </div>
-      </div>
-    </header>
+      )}
+    </>
   );
 }
