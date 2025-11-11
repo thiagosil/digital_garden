@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     await initializeDb();
 
     const body = await request.json();
-    const { title, mediaType, status, rating, coverImage, creator, synopsis, apiId } = body;
+    const { title, mediaType, status, rating, coverImage, creator, synopsis, apiId, currentSeason, currentEpisode, totalSeasons, episodesInSeason } = body;
 
     if (!title || !mediaType) {
       return NextResponse.json(
@@ -52,6 +52,10 @@ export async function POST(request: NextRequest) {
       creator,
       synopsis,
       apiId,
+      currentSeason,
+      currentEpisode,
+      totalSeasons,
+      episodesInSeason,
     });
 
     return NextResponse.json({ item }, { status: 201 });

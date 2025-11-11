@@ -11,6 +11,7 @@ import { ArrowLeft, Save, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { StarRating } from '@/components/star-rating';
 import { MediaItem } from '@/lib/db';
+import { EpisodeList } from '@/components/episode-list';
 
 export default function MediaDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -22,6 +23,26 @@ export default function MediaDetailPage({ params }: { params: Promise<{ id: stri
   const [notes, setNotes] = useState('');
   const [rating, setRating] = useState<number | null>(null);
   const [completedAt, setCompletedAt] = useState('');
+  const [currentSeason, setCurrentSeason] = useState<number>(1);
+  const [currentEpisode, setCurrentEpisode] = useState<number>(1);
+  const [totalSeasons, setTotalSeasons] = useState<number | null>(null);
+  const [episodesInSeason, setEpisodesInSeason] = useState<number | null>(null);
+  const [tvShowSeasons, setTvShowSeasons] = useState<Array<{ seasonNumber: number; episodeCount: number }>>([]);
+
+  // Get max episodes for current season
+  const maxEpisodesInCurrentSeason = tvShowSeasons.find(s => s.seasonNumber === currentSeason)?.episodeCount || episodesInSeason;
+
+  // Update episode count when season changes
+  useEffect(() => {
+    const seasonData = tvShowSeasons.find(s => s.seasonNumber === currentSeason);
+    if (seasonData) {
+      setEpisodesInSeason(seasonData.episodeCount);
+      // Reset episode to 1 if current episode exceeds the max for new season
+      if (currentEpisode > seasonData.episodeCount) {
+        setCurrentEpisode(1);
+      }
+    }
+  }, [currentSeason, tvShowSeasons]);
 
   useEffect(() => {
     fetchItem();
@@ -35,6 +56,32 @@ export default function MediaDetailPage({ params }: { params: Promise<{ id: stri
       setStatus(data.item.status);
       setNotes(data.item.notes || '');
       setRating(data.item.rating || null);
+
+      // TV show progress
+      setCurrentSeason(data.item.currentSeason || 1);
+      setCurrentEpisode(data.item.currentEpisode || 1);
+      setTotalSeasons(data.item.totalSeasons || null);
+      setEpisodesInSeason(data.item.episodesInSeason || null);
+
+      // Fetch TV show details if it's a TV show with an API ID
+      if (data.item.mediaType === 'TV_SHOW' && data.item.apiId) {
+        try {
+          const tvResponse = await fetch(`/api/tv-show-details?tmdbId=${data.item.apiId}`);
+          if (tvResponse.ok) {
+            const tvData = await tvResponse.json();
+            setTvShowSeasons(tvData.seasons || []);
+            // Update episode count for current season if we don't have it
+            if (!data.item.episodesInSeason) {
+              const currentSeasonData = tvData.seasons.find((s: any) => s.seasonNumber === (data.item.currentSeason || 1));
+              if (currentSeasonData) {
+                setEpisodesInSeason(currentSeasonData.episodeCount);
+              }
+            }
+          }
+        } catch (error) {
+          console.error('Failed to fetch TV show details:', error);
+        }
+      }
 
       // Format completedAt for input[type="date"]
       if (data.item.completedAt) {
@@ -62,6 +109,14 @@ export default function MediaDetailPage({ params }: { params: Promise<{ id: stri
         body.completedAt = null;
       }
 
+      // Include TV show progress for TV shows
+      if (item?.mediaType === 'TV_SHOW') {
+        body.currentSeason = currentSeason;
+        body.currentEpisode = currentEpisode;
+        body.totalSeasons = totalSeasons;
+        body.episodesInSeason = episodesInSeason;
+      }
+
       const response = await fetch(`/api/media/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -84,6 +139,42 @@ export default function MediaDetailPage({ params }: { params: Promise<{ id: stri
       console.error('Failed to update item:', error);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleEpisodeClick = async (season: number, episode: number) => {
+    // Update local state
+    setCurrentSeason(season);
+    setCurrentEpisode(episode);
+
+    // Find the episode count for this season
+    const seasonData = tvShowSeasons.find(s => s.seasonNumber === season);
+    if (seasonData) {
+      setEpisodesInSeason(seasonData.episodeCount);
+    }
+
+    // Auto-save the progress
+    try {
+      const body: any = {
+        currentSeason: season,
+        currentEpisode: episode,
+        totalSeasons,
+        episodesInSeason: seasonData?.episodeCount || episodesInSeason,
+      };
+
+      // If not already IN_PROGRESS, set it
+      if (status !== 'IN_PROGRESS') {
+        body.status = 'IN_PROGRESS';
+        setStatus('IN_PROGRESS');
+      }
+
+      await fetch(`/api/media/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+    } catch (error) {
+      console.error('Failed to update episode:', error);
     }
   };
 
@@ -226,6 +317,62 @@ export default function MediaDetailPage({ params }: { params: Promise<{ id: stri
                 />
               </div>
             )}
+
+            {/* TV Show Progress */}
+            {item.mediaType === 'TV_SHOW' && status === 'IN_PROGRESS' && (
+              <div className="space-y-2 sm:space-y-3">
+                <Label className="text-sm font-semibold">Current Progress</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="current-season" className="text-xs text-muted-foreground">Season</Label>
+                    <Input
+                      id="current-season"
+                      type="number"
+                      min="1"
+                      max={totalSeasons || undefined}
+                      value={currentSeason}
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value) || 1;
+                        const max = totalSeasons || 999;
+                        setCurrentSeason(Math.min(Math.max(1, value), max));
+                      }}
+                      className="h-11 sm:h-12"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="current-episode" className="text-xs text-muted-foreground">Episode</Label>
+                    <Input
+                      id="current-episode"
+                      type="number"
+                      min="1"
+                      max={maxEpisodesInCurrentSeason || undefined}
+                      value={currentEpisode}
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value) || 1;
+                        const max = maxEpisodesInCurrentSeason || 999;
+                        setCurrentEpisode(Math.min(Math.max(1, value), max));
+                      }}
+                      className="h-11 sm:h-12"
+                    />
+                  </div>
+                </div>
+                {totalSeasons && (
+                  <p className="text-xs text-muted-foreground">
+                    Season {currentSeason} of {totalSeasons} total seasons
+                    {maxEpisodesInCurrentSeason && ` • Episode ${currentEpisode} of ${maxEpisodesInCurrentSeason}`}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Show total seasons info even when not watching */}
+            {item.mediaType === 'TV_SHOW' && status !== 'IN_PROGRESS' && totalSeasons && (
+              <div className="space-y-2 sm:space-y-3">
+                <div className="inline-block px-3 py-1.5 bg-muted rounded text-xs font-medium">
+                  {totalSeasons} {totalSeasons === 1 ? 'Season' : 'Seasons'}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Details */}
@@ -249,6 +396,23 @@ export default function MediaDetailPage({ params }: { params: Promise<{ id: stri
                 <p className="text-muted-foreground text-sm sm:text-base leading-relaxed font-light">
                   {item.synopsis}
                 </p>
+              </div>
+            )}
+
+            {/* Episode List - Only for TV shows */}
+            {item.mediaType === 'TV_SHOW' && item.apiId && tvShowSeasons.length > 0 && (
+              <div className="space-y-2 sm:space-y-3">
+                <EpisodeList
+                  tmdbId={item.apiId}
+                  seasons={tvShowSeasons.map(s => ({
+                    seasonNumber: s.seasonNumber,
+                    episodeCount: s.episodeCount,
+                    name: `Season ${s.seasonNumber}`
+                  }))}
+                  currentSeason={currentSeason}
+                  currentEpisode={currentEpisode}
+                  onEpisodeClick={handleEpisodeClick}
+                />
               </div>
             )}
 

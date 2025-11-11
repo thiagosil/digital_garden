@@ -30,6 +30,16 @@ interface SearchResult {
   synopsis: string | null;
 }
 
+interface TVShowDetails {
+  totalSeasons: number;
+  seasons: Array<{
+    seasonNumber: number;
+    episodeCount: number;
+    name: string;
+    airDate: string;
+  }>;
+}
+
 interface AddMediaDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -46,6 +56,22 @@ export function AddMediaDialog({ open, onOpenChange, onItemAdded, defaultMediaTy
   const [searching, setSearching] = useState(false);
   const [adding, setAdding] = useState(false);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // TV Show progress tracking
+  const [currentSeason, setCurrentSeason] = useState<number>(1);
+  const [currentEpisode, setCurrentEpisode] = useState<number>(1);
+  const [tvShowDetails, setTvShowDetails] = useState<TVShowDetails | null>(null);
+  const [fetchingDetails, setFetchingDetails] = useState(false);
+
+  // Get max episodes for current season
+  const maxEpisodesInCurrentSeason = tvShowDetails?.seasons.find(s => s.seasonNumber === currentSeason)?.episodeCount || null;
+
+  // Reset episode to 1 when season changes or validate against max
+  useEffect(() => {
+    if (maxEpisodesInCurrentSeason && currentEpisode > maxEpisodesInCurrentSeason) {
+      setCurrentEpisode(1);
+    }
+  }, [currentSeason, maxEpisodesInCurrentSeason]);
 
   // Pre-populate media type when dialog opens
   useEffect(() => {
@@ -73,12 +99,32 @@ export function AddMediaDialog({ open, onOpenChange, onItemAdded, defaultMediaTy
     }
   }, [mediaType, searchQuery]);
 
+  const fetchTVShowDetails = async (tmdbId: string) => {
+    setFetchingDetails(true);
+    try {
+      const response = await fetch(`/api/tv-show-details?tmdbId=${tmdbId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setTvShowDetails(data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch TV show details:', error);
+    } finally {
+      setFetchingDetails(false);
+    }
+  };
+
   const handleAddItem = async (result: SearchResult) => {
     setAdding(true);
     try {
+      // Fetch TV show details if it's a TV show and we don't have them yet
+      if ((mediaType === 'TV_SHOW' || defaultMediaType === 'TV_SHOW') && !tvShowDetails) {
+        await fetchTVShowDetails(result.apiId);
+      }
+
       const body: any = {
         title: result.title,
-        mediaType,
+        mediaType: mediaType || defaultMediaType,
         status,
         coverImage: result.coverImage,
         creator: result.creator,
@@ -89,6 +135,44 @@ export function AddMediaDialog({ open, onOpenChange, onItemAdded, defaultMediaTy
       // Only include rating if status is COMPLETED and rating is set
       if (status === 'COMPLETED' && rating) {
         body.rating = rating;
+      }
+
+      // Include TV show progress if it's a TV show and status is IN_PROGRESS
+      if ((mediaType === 'TV_SHOW' || defaultMediaType === 'TV_SHOW') && status === 'IN_PROGRESS') {
+        // Ensure we have TV show details
+        let details = tvShowDetails;
+        if (!details) {
+          const response = await fetch(`/api/tv-show-details?tmdbId=${result.apiId}`);
+          if (response.ok) {
+            details = await response.json();
+          }
+        }
+
+        if (details) {
+          body.currentSeason = currentSeason;
+          body.currentEpisode = currentEpisode;
+          body.totalSeasons = details.totalSeasons;
+
+          // Find the current season's episode count
+          const season = details.seasons.find(s => s.seasonNumber === currentSeason);
+          if (season) {
+            body.episodesInSeason = season.episodeCount;
+          }
+        }
+      }
+
+      // Store total seasons for TV shows even if not IN_PROGRESS
+      if ((mediaType === 'TV_SHOW' || defaultMediaType === 'TV_SHOW')) {
+        let details = tvShowDetails;
+        if (!details) {
+          const response = await fetch(`/api/tv-show-details?tmdbId=${result.apiId}`);
+          if (response.ok) {
+            details = await response.json();
+          }
+        }
+        if (details) {
+          body.totalSeasons = details.totalSeasons;
+        }
       }
 
       const response = await fetch('/api/media', {
@@ -105,6 +189,9 @@ export function AddMediaDialog({ open, onOpenChange, onItemAdded, defaultMediaTy
         setRating(null);
         setSearchQuery('');
         setSearchResults([]);
+        setCurrentSeason(1);
+        setCurrentEpisode(1);
+        setTvShowDetails(null);
       }
     } catch (error) {
       console.error('Failed to add item:', error);
@@ -247,6 +334,55 @@ export function AddMediaDialog({ open, onOpenChange, onItemAdded, defaultMediaTy
                     size="md"
                   />
                 </div>
+              </div>
+            )}
+
+            {/* TV Show Progress - Only show for TV shows when IN_PROGRESS */}
+            {(mediaType === 'TV_SHOW' || defaultMediaType === 'TV_SHOW') && status === 'IN_PROGRESS' && (
+              <div className="pt-2 space-y-2">
+                <Label className="text-xs sm:text-sm font-semibold">Current Progress (optional)</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="current-season" className="text-xs text-muted-foreground">Season</Label>
+                    <Input
+                      id="current-season"
+                      type="number"
+                      min="1"
+                      max={tvShowDetails?.totalSeasons || undefined}
+                      value={currentSeason}
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value) || 1;
+                        const max = tvShowDetails?.totalSeasons || 999;
+                        setCurrentSeason(Math.min(Math.max(1, value), max));
+                      }}
+                      className="h-10"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="current-episode" className="text-xs text-muted-foreground">Episode</Label>
+                    <Input
+                      id="current-episode"
+                      type="number"
+                      min="1"
+                      max={maxEpisodesInCurrentSeason || undefined}
+                      value={currentEpisode}
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value) || 1;
+                        const max = maxEpisodesInCurrentSeason || 999;
+                        setCurrentEpisode(Math.min(Math.max(1, value), max));
+                      }}
+                      className="h-10"
+                    />
+                  </div>
+                </div>
+                {maxEpisodesInCurrentSeason ? (
+                  <p className="text-xs text-muted-foreground">
+                    Season {currentSeason} has {maxEpisodesInCurrentSeason} episodes
+                    {tvShowDetails?.totalSeasons && ` • ${tvShowDetails.totalSeasons} total seasons`}
+                  </p>
+                ) : (
+                  <p className="text-xs text-muted-foreground">You can update this later</p>
+                )}
               </div>
             )}
           </div>

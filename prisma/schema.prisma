@@ -34,6 +34,12 @@ model MediaItem {
 
   // API-specific IDs for fetching additional data
   apiId       String?  // ID from the external API (TMDB, Google Books, RAWG, etc.)
+
+  // TV Show progress tracking
+  currentSeason    Int?  // Current season being watched
+  currentEpisode   Int?  // Current episode in the season
+  totalSeasons     Int?  // Total number of seasons
+  episodesInSeason Int?  // Number of episodes in current season
 }
 
 enum MediaType {

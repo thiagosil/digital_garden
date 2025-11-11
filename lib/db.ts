@@ -57,11 +57,39 @@ export async function initializeDb() {
           completedAt TEXT,
           createdAt TEXT NOT NULL,
           updatedAt TEXT NOT NULL,
-          apiId TEXT
+          apiId TEXT,
+          currentSeason INTEGER,
+          currentEpisode INTEGER,
+          totalSeasons INTEGER,
+          episodesInSeason INTEGER
         )
       `,
       args: []
     });
+
+    // Add TV show progress columns if they don't exist (migration)
+    try {
+      await db.execute({
+        sql: `ALTER TABLE MediaItem ADD COLUMN currentSeason INTEGER`,
+        args: []
+      });
+      await db.execute({
+        sql: `ALTER TABLE MediaItem ADD COLUMN currentEpisode INTEGER`,
+        args: []
+      });
+      await db.execute({
+        sql: `ALTER TABLE MediaItem ADD COLUMN totalSeasons INTEGER`,
+        args: []
+      });
+      await db.execute({
+        sql: `ALTER TABLE MediaItem ADD COLUMN episodesInSeason INTEGER`,
+        args: []
+      });
+      console.log('TV show progress columns added successfully');
+    } catch (error) {
+      // Columns might already exist, ignore error
+      console.log('TV show progress columns already exist or migration skipped');
+    }
 
     dbInitialized = true;
     console.log('Database tables initialized successfully');
@@ -85,6 +113,11 @@ export interface MediaItem {
   createdAt: string;
   updatedAt: string;
   apiId: string | null;
+  // TV Show progress tracking
+  currentSeason: number | null;
+  currentEpisode: number | null;
+  totalSeasons: number | null;
+  episodesInSeason: number | null;
 }
 
 function generateId() {
@@ -128,6 +161,10 @@ export const mediaQueries = {
     creator?: string;
     synopsis?: string;
     apiId?: string;
+    currentSeason?: number | null;
+    currentEpisode?: number | null;
+    totalSeasons?: number | null;
+    episodesInSeason?: number | null;
   }): Promise<MediaItem> => {
     const db = getDb();
     const id = generateId();
@@ -135,8 +172,8 @@ export const mediaQueries = {
 
     await db.execute({
       sql: `
-        INSERT INTO MediaItem (id, title, mediaType, status, rating, coverImage, creator, synopsis, apiId, createdAt, updatedAt)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO MediaItem (id, title, mediaType, status, rating, coverImage, creator, synopsis, apiId, currentSeason, currentEpisode, totalSeasons, episodesInSeason, createdAt, updatedAt)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `,
       args: [
         id,
@@ -148,6 +185,10 @@ export const mediaQueries = {
         data.creator || null,
         data.synopsis || null,
         data.apiId || null,
+        data.currentSeason || null,
+        data.currentEpisode || null,
+        data.totalSeasons || null,
+        data.episodesInSeason || null,
         now,
         now
       ]
@@ -161,6 +202,10 @@ export const mediaQueries = {
     notes?: string;
     rating?: number | null;
     completedAt?: string | null;
+    currentSeason?: number | null;
+    currentEpisode?: number | null;
+    totalSeasons?: number | null;
+    episodesInSeason?: number | null;
   }): Promise<MediaItem> => {
     const db = getDb();
     const now = new Date().toISOString();
@@ -195,6 +240,26 @@ export const mediaQueries = {
     if (data.completedAt !== undefined) {
       updates.push('completedAt = ?');
       params.push(data.completedAt);
+    }
+
+    if (data.currentSeason !== undefined) {
+      updates.push('currentSeason = ?');
+      params.push(data.currentSeason);
+    }
+
+    if (data.currentEpisode !== undefined) {
+      updates.push('currentEpisode = ?');
+      params.push(data.currentEpisode);
+    }
+
+    if (data.totalSeasons !== undefined) {
+      updates.push('totalSeasons = ?');
+      params.push(data.totalSeasons);
+    }
+
+    if (data.episodesInSeason !== undefined) {
+      updates.push('episodesInSeason = ?');
+      params.push(data.episodesInSeason);
     }
 
     params.push(id);
