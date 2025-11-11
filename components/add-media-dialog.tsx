@@ -120,20 +120,20 @@ export function AddMediaDialog({ open, onOpenChange, onItemAdded }: AddMediaDial
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-        <DialogHeader className="space-y-3">
-          <DialogTitle className="text-2xl sm:text-3xl font-bold tracking-tight">Add New Media</DialogTitle>
-          <DialogDescription className="text-base font-light text-muted-foreground">
+      <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[85vh] sm:max-h-[80vh] overflow-y-auto p-4 sm:p-6">
+        <DialogHeader className="space-y-2 sm:space-y-3">
+          <DialogTitle className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight">Add New Media</DialogTitle>
+          <DialogDescription className="text-sm sm:text-base font-light text-muted-foreground">
             Search for a book, movie, TV show, or video game to add to your collection.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6 pt-2">
+        <div className="space-y-4 sm:space-y-6 pt-2">
           {/* Media Type Selection */}
-          <div className="space-y-3">
+          <div className="space-y-2 sm:space-y-3">
             <Label htmlFor="media-type" className="text-sm font-semibold">Media Type</Label>
             <Select value={mediaType} onValueChange={setMediaType}>
-              <SelectTrigger id="media-type" className="h-11">
+              <SelectTrigger id="media-type" className="h-11 sm:h-12">
                 <SelectValue placeholder="Select media type" />
               </SelectTrigger>
               <SelectContent>
@@ -146,7 +146,7 @@ export function AddMediaDialog({ open, onOpenChange, onItemAdded }: AddMediaDial
           </div>
 
           {/* Search Input */}
-          <div className="space-y-3">
+          <div className="space-y-2 sm:space-y-3">
             <Label htmlFor="search" className="text-sm font-semibold">Search</Label>
             <div className="flex gap-2">
               <Input
@@ -156,15 +156,15 @@ export function AddMediaDialog({ open, onOpenChange, onItemAdded }: AddMediaDial
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                 disabled={!mediaType}
-                className="h-11"
+                className="h-11 sm:h-12"
               />
               <Button
                 onClick={handleSearch}
                 disabled={!mediaType || !searchQuery.trim() || searching}
                 size="lg"
-                className="px-5"
+                className="h-11 sm:h-12 w-11 sm:w-12 p-0 flex-shrink-0"
               >
-                <Search className="h-4 w-4" />
+                <Search className="h-5 w-5" />
               </Button>
             </div>
           </div>
@@ -177,36 +177,36 @@ export function AddMediaDialog({ open, onOpenChange, onItemAdded }: AddMediaDial
           )}
 
           {!searching && searchResults.length > 0 && (
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               <Label className="text-sm font-semibold">Results</Label>
-              <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
+              <div className="space-y-2 sm:space-y-3 max-h-[50vh] sm:max-h-96 overflow-y-auto pr-1 sm:pr-2">
                 {searchResults.map((result) => (
                   <div
                     key={result.apiId}
-                    className="flex gap-4 p-4 border rounded-lg hover:bg-accent/50 transition-colors"
+                    className="flex gap-3 sm:gap-4 p-3 sm:p-4 border rounded-lg hover:bg-accent/50 transition-colors"
                   >
-                    <div className="w-16 h-24 bg-muted rounded flex-shrink-0 relative overflow-hidden shadow-sm">
+                    <div className="w-14 h-20 sm:w-16 sm:h-24 bg-muted rounded flex-shrink-0 relative overflow-hidden shadow-sm">
                       {result.coverImage ? (
                         <Image
                           src={result.coverImage}
                           alt={result.title}
                           fill
                           className="object-cover"
-                          sizes="64px"
+                          sizes="(max-width: 640px) 56px, 64px"
                         />
                       ) : (
-                        <div className="flex items-center justify-center h-full text-xs text-muted-foreground font-light">
+                        <div className="flex items-center justify-center h-full text-xs text-muted-foreground font-light px-1">
                           No image
                         </div>
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-semibold line-clamp-1 tracking-tight">{result.title}</h4>
-                      <p className="text-sm text-muted-foreground line-clamp-1 font-light mt-0.5">
+                      <h4 className="font-semibold line-clamp-2 sm:line-clamp-1 tracking-tight text-sm sm:text-base">{result.title}</h4>
+                      <p className="text-xs sm:text-sm text-muted-foreground line-clamp-1 font-light mt-0.5 sm:mt-1">
                         {result.creator}
                       </p>
                       {result.synopsis && (
-                        <p className="text-xs text-muted-foreground line-clamp-2 mt-2 font-light leading-relaxed">
+                        <p className="text-xs text-muted-foreground line-clamp-2 mt-1 sm:mt-2 font-light leading-relaxed hidden sm:block">
                           {result.synopsis}
                         </p>
                       )}
@@ -215,7 +215,7 @@ export function AddMediaDialog({ open, onOpenChange, onItemAdded }: AddMediaDial
                       size="default"
                       onClick={() => handleAddItem(result)}
                       disabled={adding}
-                      className="self-start font-medium"
+                      className="self-start font-medium h-9 sm:h-10 text-sm px-3 sm:px-4 flex-shrink-0"
                     >
                       Add
                     </Button>
