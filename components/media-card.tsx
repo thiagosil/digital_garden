@@ -3,14 +3,9 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 import { useState } from 'react';
+import { StarRating } from './star-rating';
 
 interface MediaCardProps {
   id: string;
@@ -19,12 +14,14 @@ interface MediaCardProps {
   coverImage: string | null;
   status: string;
   mediaType: string;
+  rating: number | null;
   completedAt: Date | null;
   onStatusChange?: () => void;
 }
 
-export function MediaCard({ id, title, creator, coverImage, status, mediaType, completedAt, onStatusChange }: MediaCardProps) {
+export function MediaCard({ id, title, creator, coverImage, status, mediaType, rating, completedAt, onStatusChange }: MediaCardProps) {
   const [currentStatus, setCurrentStatus] = useState(status);
+  const [currentRating, setCurrentRating] = useState(rating);
   const [updating, setUpdating] = useState(false);
 
   const handleStatusChange = async (newStatus: string) => {
@@ -49,31 +46,43 @@ export function MediaCard({ id, title, creator, coverImage, status, mediaType, c
     }
   };
 
-  const getStatusLabel = (statusValue: string) => {
-    const labels: Record<string, Record<string, string>> = {
+  const handleRatingChange = async (newRating: number) => {
+    try {
+      const response = await fetch(`/api/media/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rating: newRating || null }),
+      });
+
+      if (response.ok) {
+        setCurrentRating(newRating);
+      }
+    } catch (error) {
+      console.error('Failed to update rating:', error);
+    }
+  };
+
+  const getActionButton = () => {
+    const buttonConfig: Record<string, Record<string, { label: string; nextStatus: string }>> = {
       BOOK: {
-        BACKLOG: 'Want to Read',
-        IN_PROGRESS: 'Reading',
-        COMPLETED: 'Read',
+        BACKLOG: { label: 'Start Reading', nextStatus: 'IN_PROGRESS' },
+        IN_PROGRESS: { label: 'Mark as Read', nextStatus: 'COMPLETED' },
       },
       MOVIE: {
-        BACKLOG: 'Want to Watch',
-        IN_PROGRESS: 'Watching',
-        COMPLETED: 'Watched',
+        BACKLOG: { label: 'Start Watching', nextStatus: 'IN_PROGRESS' },
+        IN_PROGRESS: { label: 'Mark as Watched', nextStatus: 'COMPLETED' },
       },
       TV_SHOW: {
-        BACKLOG: 'Want to Watch',
-        IN_PROGRESS: 'Watching',
-        COMPLETED: 'Watched',
+        BACKLOG: { label: 'Start Watching', nextStatus: 'IN_PROGRESS' },
+        IN_PROGRESS: { label: 'Mark as Watched', nextStatus: 'COMPLETED' },
       },
       VIDEO_GAME: {
-        BACKLOG: 'Want to Play',
-        IN_PROGRESS: 'Playing',
-        COMPLETED: 'Played',
+        BACKLOG: { label: 'Start Playing', nextStatus: 'IN_PROGRESS' },
+        IN_PROGRESS: { label: 'Mark as Played', nextStatus: 'COMPLETED' },
       },
     };
 
-    return labels[mediaType]?.[statusValue] || statusValue;
+    return buttonConfig[mediaType]?.[currentStatus];
   };
 
   return (
@@ -119,27 +128,33 @@ export function MediaCard({ id, title, creator, coverImage, status, mediaType, c
         </div>
       </Link>
 
-      {/* Quick Status Change */}
+      {/* Action Button or Rating */}
       <div
         className="mt-2"
         onClick={(e) => e.stopPropagation()}
       >
-        <Select
-          value={currentStatus}
-          onValueChange={handleStatusChange}
-          disabled={updating}
-        >
-          <SelectTrigger className="h-8 text-xs w-full">
-            <SelectValue>
-              {updating ? 'Updating...' : getStatusLabel(currentStatus)}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="BACKLOG">{getStatusLabel('BACKLOG')}</SelectItem>
-            <SelectItem value="IN_PROGRESS">{getStatusLabel('IN_PROGRESS')}</SelectItem>
-            <SelectItem value="COMPLETED">{getStatusLabel('COMPLETED')}</SelectItem>
-          </SelectContent>
-        </Select>
+        {currentStatus === 'COMPLETED' ? (
+          <div className="flex items-center justify-center py-1">
+            <StarRating
+              rating={currentRating}
+              onRatingChange={handleRatingChange}
+              size="sm"
+            />
+          </div>
+        ) : (
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full h-8 text-xs"
+            onClick={() => {
+              const action = getActionButton();
+              if (action) handleStatusChange(action.nextStatus);
+            }}
+            disabled={updating}
+          >
+            {updating ? 'Updating...' : getActionButton()?.label}
+          </Button>
+        )}
       </div>
     </div>
   );

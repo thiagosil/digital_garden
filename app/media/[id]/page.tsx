@@ -189,15 +189,17 @@ export default function MediaDetailPage({ params }: { params: Promise<{ id: stri
               </Select>
             </div>
 
-            {/* Rating */}
-            <div className="space-y-2 sm:space-y-3">
-              <Label className="text-sm font-semibold">Rating</Label>
-              <StarRating
-                rating={rating}
-                onRatingChange={setRating}
-                size="md"
-              />
-            </div>
+            {/* Rating - Only show when completed */}
+            {status === 'COMPLETED' && (
+              <div className="space-y-2 sm:space-y-3">
+                <Label className="text-sm font-semibold">Rating</Label>
+                <StarRating
+                  rating={rating}
+                  onRatingChange={setRating}
+                  size="md"
+                />
+              </div>
+            )}
 
             {/* Completion Date */}
             {status === 'COMPLETED' && (

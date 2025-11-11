@@ -123,6 +123,7 @@ export const mediaQueries = {
     title: string;
     mediaType: string;
     status?: string;
+    rating?: number | null;
     coverImage?: string;
     creator?: string;
     synopsis?: string;
@@ -134,14 +135,15 @@ export const mediaQueries = {
 
     await db.execute({
       sql: `
-        INSERT INTO MediaItem (id, title, mediaType, status, coverImage, creator, synopsis, apiId, createdAt, updatedAt)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO MediaItem (id, title, mediaType, status, rating, coverImage, creator, synopsis, apiId, createdAt, updatedAt)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `,
       args: [
         id,
         data.title,
         data.mediaType,
         data.status || 'BACKLOG',
+        data.rating || null,
         data.coverImage || null,
         data.creator || null,
         data.synopsis || null,

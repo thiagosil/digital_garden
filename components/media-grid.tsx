@@ -9,6 +9,7 @@ interface MediaItem {
   coverImage: string | null;
   status: string;
   mediaType: string;
+  rating: number | null;
   completedAt: Date | null;
 }
 
@@ -39,6 +40,7 @@ export function MediaGrid({ items, onRefresh }: MediaGridProps) {
           coverImage={item.coverImage}
           status={item.status}
           mediaType={item.mediaType}
+          rating={item.rating}
           completedAt={item.completedAt}
           onStatusChange={onRefresh}
         />
