@@ -119,8 +119,7 @@ p {
 
 @media (min-width: 768px) {
   .fab {
-    position: static;
-    bottom: auto;
-    right: auto;
+    bottom: 2rem;
+    right: 2rem;
   }
 }
