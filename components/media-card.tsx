@@ -151,8 +151,8 @@ export function MediaCard({ id, title, creator, coverImage, status, mediaType, r
 
           {/* TV Show Progress Badge */}
           {mediaType === 'TV_SHOW' && currentStatus === 'IN_PROGRESS' && season && episode && (
-            <div className="absolute bottom-0 left-0 right-0 bg-primary/95 backdrop-blur-sm py-1.5 sm:py-2 px-2 sm:px-3">
-              <p className="text-xs sm:text-sm font-medium text-primary-foreground text-center">
+            <div className="absolute bottom-0 left-0 right-0 bg-black/80 backdrop-blur-sm py-1.5 sm:py-2 px-2 sm:px-3">
+              <p className="text-xs sm:text-sm font-semibold text-white text-center drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
                 S{season}E{episode}
                 {episodesInSeason && ` of ${episodesInSeason}`}
               </p>
