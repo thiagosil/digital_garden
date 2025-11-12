@@ -80,6 +80,18 @@ export function AddMediaDialog({ open, onOpenChange, onItemAdded, defaultMediaTy
     }
   }, [open, defaultMediaType]);
 
+  // Reset search state when dialog closes
+  useEffect(() => {
+    if (!open) {
+      setSearchQuery('');
+      setSearchResults([]);
+      setRating(null);
+      setCurrentSeason(1);
+      setCurrentEpisode(1);
+      setTvShowDetails(null);
+    }
+  }, [open]);
+
   const handleSearch = useCallback(async () => {
     if (!mediaType || !searchQuery.trim()) {
       return;
