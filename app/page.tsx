@@ -180,11 +180,12 @@ export default function Home() {
           <div className="space-y-2 sm:space-y-4">
             <div className="flex items-center justify-between gap-4">
               <h1 className="text-2xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight">{pageContent.title}</h1>
+              {/* Desktop plus button - inline with header */}
               <Button
                 onClick={() => setIsAddDialogOpen(true)}
                 variant="ghost"
                 size="sm"
-                className="fab md:shrink-0 md:text-foreground md:hover:text-foreground/80 [&_svg]:!size-auto h-14 w-14 md:h-11 md:w-11 p-0 rounded-full md:rounded-md bg-foreground md:bg-transparent text-background md:text-foreground shadow-lg md:shadow-none hover:shadow-xl md:hover:shadow-none hover:scale-105 md:hover:scale-100 active:scale-95"
+                className="hidden md:flex md:shrink-0 md:text-foreground md:hover:text-foreground/80 [&_svg]:!size-auto md:h-11 md:w-11 p-0 md:rounded-md md:bg-transparent md:text-foreground md:shadow-none md:hover:shadow-none md:hover:scale-100"
               >
                 <PlusIcon size={28} weight="bold" className="md:[&]:w-6 md:[&]:h-6" />
               </Button>
@@ -211,6 +212,16 @@ export default function Home() {
           loading={loading}
         />
       </div>
+
+      {/* Mobile floating action button - fixed position */}
+      <Button
+        onClick={() => setIsAddDialogOpen(true)}
+        variant="ghost"
+        size="sm"
+        className="fab md:hidden [&_svg]:!size-auto h-14 w-14 p-0 rounded-full bg-foreground text-background shadow-lg hover:shadow-xl hover:scale-105 active:scale-95"
+      >
+        <PlusIcon size={28} weight="bold" />
+      </Button>
 
       <AddMediaDialog
         open={isAddDialogOpen}
