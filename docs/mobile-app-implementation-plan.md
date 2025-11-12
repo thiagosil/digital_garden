@@ -389,7 +389,7 @@ In each button:
 
 Install dependency:
 ```bash
-npm install react-use-gesture
+pnpm add react-use-gesture
 ```
 
 **Implementation:**
@@ -804,16 +804,16 @@ Use the Drop icon from the logo as the app icon base.
 
 ## Dependencies
 
-### NPM Packages (Optional)
+### PNPM Packages (Optional)
 ```bash
 # For advanced gestures
-npm install react-use-gesture @react-spring/web
+pnpm add react-use-gesture @react-spring/web
 
 # For PWA optimization
-npm install next-pwa
+pnpm add next-pwa
 
 # For better mobile detection
-npm install react-device-detect
+pnpm add react-device-detect
 ```
 
 ### External Services

@@ -106,7 +106,7 @@ DATABASE_URL="file:./prisma/dev.db"
 
 3. Run the development server:
 ```bash
-npm run dev
+pnpm run dev
 ```
 
 The database will be automatically initialized on first run.

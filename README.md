@@ -29,7 +29,7 @@ A private digital garden for tracking books, movies, TV shows, and video games. 
 ### Prerequisites
 
 - Node.js 18+
-- npm or yarn
+- pnpm
 - [Turso CLI](https://docs.turso.tech/cli/installation) (for local development)
 
 ### Installation
@@ -42,7 +42,7 @@ cd digital_garden
 
 2. Install dependencies:
 ```bash
-npm install
+pnpm install
 ```
 
 3. Set up environment variables:
@@ -75,14 +75,14 @@ Leave this running in a separate terminal.
 
 5. Create your admin user:
 ```bash
-npm run create-user
+pnpm run create-user
 ```
 
 You'll be prompted to enter your email and password. This is the account you'll use to log in.
 
 6. Run the development server (in a new terminal):
 ```bash
-npm run dev
+pnpm run dev
 ```
 
 7. Open [http://localhost:3000](http://localhost:3000) in your browser
@@ -198,7 +198,7 @@ This digital garden is designed for **single-user private use**. All routes are 
 
 **For local development:**
 ```bash
-npm run create-user
+pnpm run create-user
 ```
 
 **For production (Vercel, etc.):**
@@ -218,7 +218,7 @@ Visit `/setup` on your deployed app (e.g., `https://your-app.vercel.app/setup`)
 
 To create additional users locally:
 ```bash
-npm run create-user
+pnpm run create-user
 ```
 
 Note: This app is designed for single-user use, but you can create multiple accounts if needed.

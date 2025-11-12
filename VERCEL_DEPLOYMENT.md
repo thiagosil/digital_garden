@@ -29,14 +29,14 @@ This app has been configured to use **Turso**, a SQLite-compatible edge database
    export TURSO_AUTH_TOKEN="your-token-here"
 
    # Push the Prisma schema to Turso
-   npx prisma db push
+   pnpm exec prisma db push
    ```
 
 ## Deploy to Vercel
 
 1. **Install Vercel CLI (if not already installed):**
    ```bash
-   npm i -g vercel
+   pnpm add -g vercel
    ```
 
 2. **Login to Vercel:**
@@ -71,10 +71,10 @@ cp .env.example .env
 
 # The DATABASE_URL is already set to file:./prisma/dev.db
 # Initialize your local database
-npx prisma db push
+pnpm exec prisma db push
 
 # Start development server
-npm run dev
+pnpm run dev
 ```
 
 ## Troubleshooting
@@ -92,7 +92,7 @@ To update your database schema:
 ```bash
 # Update prisma/schema.prisma
 # Then push changes to Turso
-npx prisma db push
+pnpm exec prisma db push
 ```
 
 ## Post-Deployment Checklist

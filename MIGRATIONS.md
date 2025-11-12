@@ -7,7 +7,7 @@
 For local development with Turso dev server:
 
 ```bash
-npm run migrate
+pnpm run migrate
 ```
 
 This will connect to your local database at `http://127.0.0.1:8080` and apply the migration.
@@ -24,7 +24,7 @@ For production Turso database:
 
 2. Run the migration:
    ```bash
-   npm run migrate
+   pnpm run migrate
    ```
 
 ## Alternative: Using Turso CLI
